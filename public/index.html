@@ -6,159 +6,113 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>西影集团 · 班子行程</title>
 <style>
-:root {
-  --red: #C41E2F;
-  --red-dark: #9B1824;
-  --bg: #F5F6FA;
-  --card: #FFF;
-  --text: #1A1A1A;
-  --text2: #555;
-  --text3: #999;
-  --border: #EBEDF0;
-  --green: #00B578;
-  --orange: #FF8F1F;
-  --blue: #1677FF;
-}
-* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-body {
-  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-  background: var(--bg); color: var(--text); min-height:100vh; padding-bottom:30px;
-  -webkit-font-smoothing: antialiased;
-}
+:root{--red:#C41E2F;--red-dark:#9B1824;--bg:#F5F6FA;--card:#FFF;--text:#1A1A1A;--text2:#555;--text3:#999;--border:#EBEDF0;--green:#00B578;--orange:#FF8F1F;--blue:#1677FF;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;}
 
-/* Header */
-.header {
-  background: linear-gradient(135deg, var(--red) 0%, var(--red-dark) 100%);
-  color: white; padding: 16px 16px 12px; position:sticky; top:0; z-index:100;
-  box-shadow: 0 2px 16px rgba(196,30,47,0.3);
-}
-.header h1 { font-size:17px; font-weight:600; text-align:center; letter-spacing:3px; }
-.header .sub { text-align:center; font-size:11px; opacity:0.6; margin-top:3px; }
+.header{background:linear-gradient(135deg,var(--red),var(--red-dark));color:white;padding:16px 16px 12px;position:sticky;top:0;z-index:100;box-shadow:0 2px 16px rgba(196,30,47,0.3);}
+.header h1{font-size:17px;font-weight:600;text-align:center;letter-spacing:3px;}
+.header .sub{text-align:center;font-size:11px;opacity:0.6;margin-top:3px;}
 
-/* Date Navigation */
-.date-nav {
-  background: white; display:flex; align-items:center; justify-content:space-between;
-  padding: 10px 12px; border-bottom:1px solid var(--border); position:relative;
-}
-.date-nav .btn {
-  width:36px; height:36px; border-radius:50%; border:1px solid var(--border);
-  background:white; display:flex; align-items:center; justify-content:center;
-  font-size:16px; color:var(--text2); cursor:pointer;
-}
-.date-nav .btn:active { background:#f5f5f5; }
-.date-nav .center { text-align:center; }
-.date-nav .date-main { font-size:17px; font-weight:700; }
-.date-nav .date-sub { font-size:12px; color:var(--text3); margin-top:2px; }
-.tag { display:inline-block; font-size:10px; padding:1px 6px; border-radius:6px; margin-left:6px; vertical-align:middle; }
-.tag-today { background:var(--red); color:white; }
-.tag-tomorrow { background:var(--orange); color:white; }
-.tag-yesterday { background:var(--text3); color:white; }
-.today-btn {
-  position:absolute; right:56px; top:50%; transform:translateY(-50%);
-  font-size:12px; color:var(--red); border:1px solid var(--red); border-radius:12px;
-  padding:2px 10px; cursor:pointer; background:white;
-}
-.today-btn:active { background: var(--red); color:white; }
+.date-nav{background:white;display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--border);position:relative;}
+.date-nav .btn{width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:white;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--text2);cursor:pointer;}
+.date-nav .btn:active{background:#f5f5f5;}
+.date-nav .center{text-align:center;}
+.date-nav .dm{font-size:17px;font-weight:700;}
+.date-nav .ds{font-size:12px;color:var(--text3);margin-top:2px;}
+.tag{display:inline-block;font-size:10px;padding:1px 6px;border-radius:6px;margin-left:6px;vertical-align:middle;}
+.tag-t{background:var(--red);color:white;}.tag-tm{background:var(--orange);color:white;}.tag-y{background:var(--text3);color:white;}
+.today-btn{position:absolute;right:56px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--red);border:1px solid var(--red);border-radius:12px;padding:2px 10px;cursor:pointer;background:white;}
 
-/* Week Strip */
-.week-strip {
-  display:flex; background:white; padding:6px 6px 10px;
-  border-bottom:1px solid var(--border); gap:2px;
-}
-.week-strip .day {
-  flex:1; text-align:center; padding:5px 0; border-radius:10px; cursor:pointer;
-  transition: all 0.15s; position:relative;
-}
-.week-strip .day.active { background:var(--red); color:white; }
-.week-strip .day.today:not(.active) { background:#FEF0F0; }
-.week-strip .day .wd { font-size:10px; color:var(--text3); }
-.week-strip .day.active .wd, .week-strip .day.today:not(.active) .wd { color:inherit; opacity:0.7; }
-.week-strip .day .dd { font-size:14px; font-weight:600; margin-top:2px; }
-.week-strip .day .dot { width:4px; height:4px; border-radius:50%; background:var(--red); margin:3px auto 0; }
-.week-strip .day.active .dot { background:white; }
+.week-strip{display:flex;background:white;padding:6px 6px 10px;border-bottom:1px solid var(--border);gap:2px;}
+.week-strip .day{flex:1;text-align:center;padding:5px 0;border-radius:10px;cursor:pointer;position:relative;}
+.week-strip .day.active{background:var(--red);color:white;}
+.week-strip .day.today:not(.active){background:#FEF0F0;}
+.week-strip .day .wd{font-size:10px;color:var(--text3);}
+.week-strip .day.active .wd,.week-strip .day.today:not(.active) .wd{color:inherit;opacity:0.7;}
+.week-strip .day .dd{font-size:14px;font-weight:600;margin-top:2px;}
+.week-strip .day .dot{width:4px;height:4px;border-radius:50%;background:var(--red);margin:3px auto 0;}
+.week-strip .day.active .dot{background:white;}
 
-/* Summary */
-.day-summary {
-  display:flex; justify-content:center; gap:24px; padding:10px;
-  font-size:12px; color:var(--text2);
-}
-.day-summary strong { color:var(--red); font-size:17px; margin-right:2px; }
+.summary{display:flex;justify-content:center;gap:24px;padding:10px;font-size:12px;color:var(--text2);}
+.summary strong{color:var(--red);font-size:17px;margin-right:2px;}
 
-/* Tab: All / By Leader */
-.mode-tabs {
-  display:flex; gap:0; margin:10px 12px 0; background:white; border-radius:10px;
-  overflow:hidden; border:1px solid var(--border);
-}
-.mode-tab {
-  flex:1; text-align:center; padding:9px 0; font-size:13px; color:var(--text2);
-  cursor:pointer; transition:all 0.2s; font-weight:500;
-}
-.mode-tab.active { background:var(--red); color:white; }
+.mode-tabs{display:flex;margin:10px 12px 0;background:white;border-radius:10px;overflow:hidden;border:1px solid var(--border);}
+.mode-tab{flex:1;text-align:center;padding:9px 0;font-size:13px;color:var(--text2);cursor:pointer;font-weight:500;}
+.mode-tab.active{background:var(--red);color:white;}
 
-/* Timeline */
-.timeline { padding:0 12px; margin-top:10px; }
-.timeline-group { margin-bottom:16px; }
-.timeline-leader {
-  display:flex; align-items:center; gap:8px; margin-bottom:8px; padding:0 4px;
-}
-.leader-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
-.leader-name { font-size:14px; font-weight:600; }
-.leader-role { font-size:11px; color:var(--text3); }
-.leader-count { font-size:11px; color:white; background:var(--red); border-radius:8px; padding:0 6px; margin-left:auto; }
+.leader-filter{display:flex;padding:10px 12px 0;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.leader-filter::-webkit-scrollbar{display:none;}
+.lf-chip{flex-shrink:0;padding:5px 12px;border-radius:16px;font-size:12px;border:1px solid var(--border);background:white;color:var(--text2);cursor:pointer;font-weight:500;}
+.lf-chip.active{background:var(--red);color:white;border-color:var(--red);}
 
-/* Time Bar */
-.time-bar {
-  background: white; border-radius:10px; overflow:hidden;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.04); margin-bottom:4px;
-}
-.time-slots { display:flex; height:28px; border-radius:8px; overflow:hidden; margin:8px; background:#F5F6FA; }
-.time-slot {
-  height:100%; display:flex; align-items:center; justify-content:center;
-  font-size:9px; font-weight:500; color:white; overflow:hidden; white-space:nowrap;
-  transition: all 0.3s;
-}
-.time-slot.busy { background: var(--red); opacity:0.85; }
-.time-slot.free { background: var(--green); opacity:0.25; }
-.time-labels { display:flex; justify-content:space-between; padding:0 8px 6px; }
-.time-label { font-size:9px; color:var(--text3); }
+.timeline{padding:0 12px;margin-top:10px;padding-bottom:80px;}
+.tl-group{margin-bottom:16px;}
+.tl-leader{display:flex;align-items:center;gap:8px;margin-bottom:8px;padding:0 4px;}
+.tl-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.tl-name{font-size:14px;font-weight:600;}
+.tl-role{font-size:11px;color:var(--text3);}
+.tl-cnt{font-size:11px;color:white;background:var(--red);border-radius:8px;padding:0 6px;margin-left:auto;}
 
-/* Schedule Items */
-.sch-item {
-  display:flex; padding:10px 12px; border-bottom:1px solid #F5F5F5;
-  gap:10px; align-items:flex-start;
-}
-.sch-item:last-child { border-bottom:none; }
-.sch-time { flex-shrink:0; width:52px; text-align:center; }
-.sch-time .t1 { font-size:14px; font-weight:700; color:var(--red); }
-.sch-time .t2 { font-size:11px; color:var(--text3); }
-.sch-body { flex:1; min-width:0; }
-.sch-title { font-size:14px; font-weight:600; line-height:1.4; }
-.sch-meta { font-size:12px; color:var(--text2); margin-top:4px; line-height:1.6; }
-.sch-notes { font-size:12px; color:var(--text3); margin-top:4px; padding-top:4px; border-top:1px dashed var(--border); line-height:1.5; }
-.allday-tag {
-  display:inline-block; font-size:11px; background:#FFF7E6; color:#D48806;
-  padding:1px 8px; border-radius:4px; font-weight:500;
-}
+.time-bar{background:white;border-radius:10px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.04);margin-bottom:4px;cursor:pointer;transition:transform 0.1s;}
+.time-bar:active{transform:scale(0.98);}
+.time-slots{display:flex;height:28px;border-radius:8px;overflow:hidden;margin:8px;background:#F5F6FA;}
+.time-slot{height:100%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:500;color:white;overflow:hidden;white-space:nowrap;}
+.time-slot.busy{background:var(--red);opacity:0.85;}
+.time-slot.free{background:var(--green);opacity:0.25;}
+.time-labels{display:flex;justify-content:space-between;padding:0 8px 6px;}
+.time-label{font-size:9px;color:var(--text3);}
 
-/* Empty */
-.empty { text-align:center; padding:50px 20px; color:var(--text3); }
-.empty .icon { font-size:40px; margin-bottom:8px; }
-.empty .msg { font-size:13px; }
+.sch-item{display:flex;padding:10px 12px;border-bottom:1px solid #F5F5F5;gap:10px;align-items:flex-start;cursor:pointer;}
+.sch-item:last-child{border-bottom:none;}
+.sch-time{flex-shrink:0;width:52px;text-align:center;}
+.sch-time .t1{font-size:14px;font-weight:700;color:var(--red);}
+.sch-time .t2{font-size:11px;color:var(--text3);}
+.sch-body{flex:1;min-width:0;}
+.sch-title{font-size:14px;font-weight:600;line-height:1.4;}
+.sch-meta{font-size:12px;color:var(--text2);margin-top:4px;line-height:1.6;}
+.sch-arrow{color:var(--text3);font-size:16px;align-self:center;flex-shrink:0;}
+.allday-tag{display:inline-block;font-size:11px;background:#FFF7E6;color:#D48806;padding:1px 8px;border-radius:4px;font-weight:500;}
 
-/* Leader Filter */
-.leader-filter {
-  display:flex; padding:10px 12px 0; gap:6px; overflow-x:auto;
-  -webkit-overflow-scrolling:touch;
-}
-.leader-filter::-webkit-scrollbar { display:none; }
-.lf-chip {
-  flex-shrink:0; padding:5px 12px; border-radius:16px; font-size:12px;
-  border:1px solid var(--border); background:white; color:var(--text2);
-  cursor:pointer; transition:all 0.2s; font-weight:500;
-}
-.lf-chip.active { background:var(--red); color:white; border-color:var(--red); }
+.empty{text-align:center;padding:50px 20px;color:var(--text3);}
+.empty .icon{font-size:40px;margin-bottom:8px;}
+.empty .msg{font-size:13px;}
 
-.footer { text-align:center; font-size:10px; color:#CCC; padding:16px; }
+.footer{text-align:center;font-size:10px;color:#CCC;padding:16px;}
+
+/* FAB */
+.fab{position:fixed;right:16px;bottom:24px;width:52px;height:52px;border-radius:50%;background:var(--red);color:white;border:none;font-size:28px;box-shadow:0 4px 16px rgba(196,30,47,0.4);cursor:pointer;z-index:200;display:flex;align-items:center;justify-content:center;}
+.fab:active{transform:scale(0.9);}
+
+/* Modal */
+.modal-mask{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:300;display:none;align-items:flex-end;justify-content:center;}
+.modal-mask.show{display:flex;}
+.modal{background:white;width:100%;max-width:500px;max-height:90vh;border-radius:16px 16px 0 0;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:16px;border-bottom:1px solid var(--border);position:sticky;top:0;background:white;z-index:1;}
+.modal-title{font-size:16px;font-weight:600;}
+.modal-close{font-size:24px;color:var(--text3);cursor:pointer;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border:none;background:none;}
+.modal-body{padding:16px;}
+
+/* Detail Modal */
+.detail-row{display:flex;padding:10px 0;border-bottom:1px solid #F8F8F8;gap:12px;}
+.detail-row:last-child{border-bottom:none;}
+.detail-label{flex-shrink:0;width:70px;font-size:13px;color:var(--text3);padding-top:1px;}
+.detail-value{flex:1;font-size:14px;line-height:1.6;word-break:break-all;}
+.detail-value.empty-val{color:var(--text3);font-style:italic;}
+.detail-tag{display:inline-block;padding:2px 10px;border-radius:10px;font-size:12px;font-weight:500;}
+
+/* Form */
+.form-group{margin-bottom:14px;}
+.form-label{font-size:13px;color:var(--text2);margin-bottom:4px;display:block;}
+.form-label .req{color:var(--red);}
+.form-input,.form-select,.form-textarea{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;background:white;color:var(--text);}
+.form-textarea{min-height:60px;resize:vertical;}
+.form-input:focus,.form-select:focus,.form-textarea:focus{outline:none;border-color:var(--red);}
+.form-row{display:flex;gap:10px;}
+.form-row .form-group{flex:1;}
+.form-submit{width:100%;padding:12px;background:var(--red);color:white;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px;}
+.form-submit:active{opacity:0.8;}
+.form-submit:disabled{opacity:0.5;}
 </style>
 </head>
 <body>
@@ -170,204 +124,231 @@ body {
 
 <div class="date-nav">
   <div class="btn" onclick="changeDate(-1)">◀</div>
-  <div class="center">
-    <div class="date-main" id="dateMain"></div>
-    <div class="date-sub" id="dateSub"></div>
-  </div>
-  <div class="today-btn" id="todayBtn" onclick="goToday()" style="display:none;">回今天</div>
+  <div class="center"><div class="dm" id="dm"></div><div class="ds" id="ds"></div></div>
+  <div class="today-btn" id="todayBtn" onclick="goToday()" style="display:none">回今天</div>
   <div class="btn" onclick="changeDate(1)">▶</div>
 </div>
 
-<div class="week-strip" id="weekStrip"></div>
-<div class="day-summary" id="daySummary"></div>
-
+<div class="week-strip" id="ws"></div>
+<div class="summary" id="sum"></div>
 <div class="mode-tabs">
-  <div class="mode-tab active" id="tabAll" onclick="setMode('all')">按时间</div>
-  <div class="mode-tab" id="tabLeader" onclick="setMode('leader')">按领导</div>
+  <div class="mode-tab active" id="mt0" onclick="setMode('all')">按时间</div>
+  <div class="mode-tab" id="mt1" onclick="setMode('leader')">按领导</div>
 </div>
-
-<div id="filterBar"></div>
-<div id="content"><div class="loading" style="text-align:center;padding:40px;color:#999;">加载中...</div></div>
+<div id="fb"></div>
+<div id="ct"><div style="text-align:center;padding:40px;color:#999;">加载中...</div></div>
 <div class="footer">数据来源：飞书多维表格 · 自动同步</div>
 
+<button class="fab" onclick="openCreate()">＋</button>
+
+<!-- Detail Modal -->
+<div class="modal-mask" id="detailModal">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title" id="detailTitle">行程详情</div><div class="modal-close" onclick="closeDetail()">✕</div></div>
+    <div class="modal-body" id="detailBody"></div>
+  </div>
+</div>
+
+<!-- Create Modal -->
+<div class="modal-mask" id="createModal">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">新增行程</div><div class="modal-close" onclick="closeCreate()">✕</div></div>
+    <div class="modal-body">
+      <form id="createForm" onsubmit="submitCreate(event)">
+        <div class="form-row">
+          <div class="form-group"><label class="form-label"><span class="req">*</span> 领导</label><select class="form-select" id="f_leader" required></select></div>
+          <div class="form-group"><label class="form-label"><span class="req">*</span> 日期</label><input type="date" class="form-input" id="f_date" required></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label"><span class="req">*</span> 开始</label><input type="time" class="form-input" id="f_start" required></div>
+          <div class="form-group"><label class="form-label">结束</label><input type="time" class="form-input" id="f_end"></div>
+        </div>
+        <div class="form-group"><label class="form-label"><span class="req">*</span> 事项</label><input class="form-input" id="f_title" placeholder="行程标题" required></div>
+        <div class="form-group"><label class="form-label">地点</label><input class="form-input" id="f_location" placeholder="具体地点"></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">参与人</label><input class="form-input" id="f_participants" placeholder="外部参会人"></div>
+          <div class="form-group"><label class="form-label">陪同人</label><input class="form-input" id="f_companion" placeholder="内部陪同人"></div>
+        </div>
+        <div class="form-group"><label class="form-label">筹备内容</label><textarea class="form-textarea" id="f_preparation" placeholder="需准备的资料、PPT、视频、物料等"></textarea></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">车辆安排</label><select class="form-select" id="f_vehicle"><option value="">请选择</option><option>需要用车</option><option>自驾</option><option>无需用车</option><option>待确认</option></select></div>
+          <div class="form-group"><label class="form-label">食宿安排</label><input class="form-input" id="f_accommodation" placeholder="酒店/餐厅等"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">重要程度</label><select class="form-select" id="f_importance"><option value="中">中</option><option value="高">高</option><option value="低">低</option></select></div>
+        </div>
+        <div class="form-group"><label class="form-label">备注</label><textarea class="form-textarea" id="f_notes" placeholder="其他需要注意的事项"></textarea></div>
+        <button type="submit" class="form-submit" id="f_submit">提交录入</button>
+      </form>
+    </div>
+  </div>
+</div>
+
 <script>
-const WD=['日','一','二','三','四','五','六'];
-const WORK_S=8*60+30, WORK_E=18*60;
-let leaders=[], allData=[], curDate=new Date(), curMode='all', curLeader='all';
+const WD=['日','一','二','三','四','五','六'], WS=8*60+30, WE=18*60;
+let L=[],D=[],cd=new Date(),cm='all',cl='all';
 
 async function init(){
-  try{ leaders=await(await fetch('/api/leaders')).json(); }catch(e){}
+  try{L=await(await fetch('/api/leaders')).json();}catch(e){}
+  const sel=document.getElementById('f_leader');
+  sel.innerHTML=L.map(l=>`<option>${l.name}</option>`).join('');
   setDate(new Date());
 }
 
-function setDate(d){
-  curDate=new Date(d.getFullYear(),d.getMonth(),d.getDate());
-  updateDateNav(); updateWeekStrip(); loadData();
-}
-function changeDate(n){ const d=new Date(curDate); d.setDate(d.getDate()+n); setDate(d); }
-function goToday(){ setDate(new Date()); }
-function fmt(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function setDate(d){cd=new Date(d.getFullYear(),d.getMonth(),d.getDate());updNav();updWS();load();}
+function changeDate(n){const d=new Date(cd);d.setDate(d.getDate()+n);setDate(d);}
+function goToday(){setDate(new Date());}
+function fmt(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 
-function updateDateNav(){
-  const d=curDate, today=new Date(); today.setHours(0,0,0,0);
-  const diff=Math.round((d-today)/86400000);
-  let tag='';
-  if(diff===0) tag='<span class="tag tag-today">今天</span>';
-  else if(diff===1) tag='<span class="tag tag-tomorrow">明天</span>';
-  else if(diff===-1) tag='<span class="tag tag-yesterday">昨天</span>';
-  document.getElementById('dateMain').innerHTML=`${d.getMonth()+1}月${d.getDate()}日${tag}`;
-  document.getElementById('dateSub').textContent=`${d.getFullYear()}年 · 星期${WD[d.getDay()]}`;
-  document.getElementById('todayBtn').style.display=diff===0?'none':'block';
+function updNav(){
+  const d=cd,t=new Date();t.setHours(0,0,0,0);const df=Math.round((d-t)/864e5);
+  let tg='';if(df===0)tg='<span class="tag tag-t">今天</span>';else if(df===1)tg='<span class="tag tag-tm">明天</span>';else if(df===-1)tg='<span class="tag tag-y">昨天</span>';
+  document.getElementById('dm').innerHTML=`${d.getMonth()+1}月${d.getDate()}日${tg}`;
+  document.getElementById('ds').textContent=`${d.getFullYear()}年 · 星期${WD[d.getDay()]}`;
+  document.getElementById('todayBtn').style.display=df===0?'none':'block';
 }
 
-function updateWeekStrip(){
-  const strip=document.getElementById('weekStrip'); strip.innerHTML='';
-  const d=new Date(curDate), dow=d.getDay()||7;
-  const mon=new Date(d); mon.setDate(d.getDate()-dow+1);
-  const today=new Date(); today.setHours(0,0,0,0);
-  for(let i=0;i<7;i++){
-    const day=new Date(mon); day.setDate(mon.getDate()+i);
-    const el=document.createElement('div');
-    el.className='day'+(day.getTime()===curDate.getTime()?' active':'')+(day.getTime()===today.getTime()?' today':'');
-    el.innerHTML=`<div class="wd">${['一','二','三','四','五','六','日'][i]}</div><div class="dd">${day.getDate()}</div>`;
-    const dd=new Date(day); el.onclick=()=>setDate(dd);
-    strip.appendChild(el);
-  }
+function updWS(){
+  const s=document.getElementById('ws');s.innerHTML='';
+  const d=new Date(cd),dw=d.getDay()||7,m=new Date(d);m.setDate(d.getDate()-dw+1);
+  const t=new Date();t.setHours(0,0,0,0);
+  for(let i=0;i<7;i++){const dy=new Date(m);dy.setDate(m.getDate()+i);const el=document.createElement('div');
+    el.className='day'+(dy.getTime()===cd.getTime()?' active':'')+(dy.getTime()===t.getTime()?' today':'');
+    el.innerHTML=`<div class="wd">${['一','二','三','四','五','六','日'][i]}</div><div class="dd">${dy.getDate()}</div>`;
+    const dd=new Date(dy);el.onclick=()=>setDate(dd);s.appendChild(el);}
 }
 
-async function loadData(){
+async function load(){
   try{
-    allData=await(await fetch('/api/schedules')).json();
+    D=await(await fetch('/api/schedules')).json();
     document.getElementById('syncTime').textContent='更新: '+new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'});
-    // week dots
-    const strip=document.getElementById('weekStrip'), days=strip.querySelectorAll('.day');
-    const d=new Date(curDate), dow=d.getDay()||7;
-    const mon=new Date(d); mon.setDate(d.getDate()-dow+1);
-    days.forEach((el,i)=>{
-      const day=new Date(mon); day.setDate(mon.getDate()+i);
-      if(allData.some(s=>s.date===fmt(day))&&!el.querySelector('.dot')){
-        const dot=document.createElement('div'); dot.className='dot'; el.appendChild(dot);
-      }
-    });
+    const s=document.getElementById('ws'),days=s.querySelectorAll('.day'),d=new Date(cd),dw=d.getDay()||7,m=new Date(d);m.setDate(d.getDate()-dw+1);
+    days.forEach((el,i)=>{const dy=new Date(m);dy.setDate(m.getDate()+i);if(D.some(x=>x.date===fmt(dy))&&!el.querySelector('.dot')){const dot=document.createElement('div');dot.className='dot';el.appendChild(dot);}});
     render();
-  }catch(e){
-    document.getElementById('content').innerHTML='<div class="empty"><div class="icon">⚠️</div><div class="msg">加载失败，请刷新重试</div></div>';
-  }
+  }catch(e){document.getElementById('ct').innerHTML='<div class="empty"><div class="icon">⚠️</div><div class="msg">加载失败</div></div>';}
 }
 
-function setMode(m){
-  curMode=m;
-  document.getElementById('tabAll').className='mode-tab'+(m==='all'?' active':'');
-  document.getElementById('tabLeader').className='mode-tab'+(m==='leader'?' active':'');
-  render();
-}
+function setMode(m){cm=m;document.getElementById('mt0').className='mode-tab'+(m==='all'?' active':'');document.getElementById('mt1').className='mode-tab'+(m==='leader'?' active':'');render();}
 
 function render(){
-  const ds=fmt(curDate);
-  let items=allData.filter(s=>s.date===ds);
-  document.getElementById('daySummary').innerHTML=`
-    <div><strong>${items.length}</strong>条行程</div>
-    <div><strong>${new Set(items.map(s=>s.leader)).size}</strong>位领导</div>
-    <div><strong>${items.filter(s=>s.importance==='高').length}</strong>条重要</div>`;
-  if(!items.length){
-    document.getElementById('filterBar').innerHTML='';
-    document.getElementById('content').innerHTML='<div class="empty"><div class="icon">📭</div><div class="msg">当日暂无行程安排</div></div>';
-    return;
-  }
-  curMode==='all'?renderAll(items):renderLeader(items);
+  const ds=fmt(cd);let items=D.filter(s=>s.date===ds);
+  document.getElementById('sum').innerHTML=`<div><strong>${items.length}</strong>条行程</div><div><strong>${new Set(items.map(s=>s.leader)).size}</strong>位领导</div><div><strong>${items.filter(s=>s.importance==='高').length}</strong>条重要</div>`;
+  if(!items.length){document.getElementById('fb').innerHTML='';document.getElementById('ct').innerHTML='<div class="empty"><div class="icon">📭</div><div class="msg">当日暂无行程安排</div></div>';return;}
+  cm==='all'?rAll(items):rLdr(items);
 }
 
-function renderAll(items){
-  const present=[...new Set(items.map(s=>s.leader))];
-  const bar=document.getElementById('filterBar');
-  bar.className='leader-filter';
-  bar.innerHTML=`<div class="lf-chip ${curLeader==='all'?'active':''}" onclick="setLeaderFilter('all')">全部</div>`+
-    present.map(n=>{const l=leaders.find(x=>x.name===n);const c=l?l.color:'#999';
-      return `<div class="lf-chip ${curLeader===n?'active':''}" onclick="setLeaderFilter('${n}')" ${curLeader===n?'':`style="border-color:${c};color:${c}"`}>${n}</div>`;
-    }).join('');
-
-  let f=curLeader==='all'?items:items.filter(s=>s.leader===curLeader);
-  document.getElementById('content').innerHTML='<div class="timeline">'+f.map(s=>{
-    const l=leaders.find(x=>x.name===s.leader);const c=l?l.color:'#999';
-    return `<div class="time-bar"><div class="sch-item">
-      <div class="sch-time">${s.is_allday?'<span class="allday-tag">全天</span>':`<div class="t1">${s.start_time}</div><div class="t2">${s.end_time||''}</div>`}</div>
-      <div class="sch-body">
-        <div class="sch-title">${s.title}</div>
-        <div class="sch-meta"><span style="background:${c}15;color:${c};padding:1px 8px;border-radius:10px;font-size:11px;font-weight:500;">${s.leader}</span>${s.location?' <span style="color:var(--text3)">📍'+s.location+'</span>':''}</div>
-        ${s.participants?`<div class="sch-meta">👥 ${s.participants}</div>`:''}
-        ${s.notes?`<div class="sch-notes">📝 ${s.notes}</div>`:''}
-      </div></div></div>`;
-  }).join('')+'</div>';
+function schCard(s,showLeader){
+  const l=L.find(x=>x.name===s.leader);const c=l?l.color:'#999';
+  return `<div class="sch-item" onclick="openDetail('${s.id}')">
+    <div class="sch-time">${s.is_allday?'<span class="allday-tag">全天</span>':`<div class="t1">${s.start_time}</div><div class="t2">${s.end_time||''}</div>`}</div>
+    <div class="sch-body"><div class="sch-title">${s.title}</div>
+      <div class="sch-meta">${showLeader?`<span style="background:${c}15;color:${c};padding:1px 8px;border-radius:10px;font-size:11px;font-weight:500;">${s.leader}</span> `:''}${s.location?'📍'+s.location:''}</div>
+      ${s.preparation?`<div class="sch-meta" style="color:var(--orange);">📋 ${s.preparation.length>20?s.preparation.slice(0,20)+'…':s.preparation}</div>`:''}
+    </div><div class="sch-arrow">›</div></div>`;
 }
 
-function renderLeader(items){
-  document.getElementById('filterBar').innerHTML='';
-  const groups={};
-  leaders.forEach(l=>{ const s=items.filter(x=>x.leader===l.name); if(s.length)groups[l.name]=s; });
+function rAll(items){
+  const p=[...new Set(items.map(s=>s.leader))];
+  const bar=document.getElementById('fb');bar.className='leader-filter';
+  bar.innerHTML=`<div class="lf-chip ${cl==='all'?'active':''}" onclick="setLF('all')">全部</div>`+p.map(n=>{const l=L.find(x=>x.name===n);const c=l?l.color:'#999';return `<div class="lf-chip ${cl===n?'active':''}" onclick="setLF('${n}')" ${cl===n?'':`style="border-color:${c};color:${c}"`}>${n}</div>`;}).join('');
+  let f=cl==='all'?items:items.filter(s=>s.leader===cl);
+  document.getElementById('ct').innerHTML='<div class="timeline">'+f.map(s=>('<div class="time-bar">'+schCard(s,true)+'</div>')).join('')+'</div>';
+}
 
+function rLdr(items){
+  document.getElementById('fb').innerHTML='';
+  const groups={};L.forEach(l=>{const s=items.filter(x=>x.leader===l.name);if(s.length)groups[l.name]=s;});
   let h='<div class="timeline">';
   for(const[name,scheds]of Object.entries(groups)){
-    const l=leaders.find(x=>x.name===name); const c=l?l.color:'#999';
-    h+=`<div class="timeline-group"><div class="timeline-leader">
-      <div class="leader-dot" style="background:${c}"></div>
-      <div class="leader-name">${name}</div><div class="leader-role">${l?l.role:''}</div>
-      <div class="leader-count">${scheds.length}</div></div>`;
-
-    // Time bar
+    const l=L.find(x=>x.name===name);const c=l?l.color:'#999';
+    h+=`<div class="tl-group"><div class="tl-leader"><div class="tl-dot" style="background:${c}"></div><div class="tl-name">${name}</div><div class="tl-role">${l?l.role:''}</div><div class="tl-cnt">${scheds.length}</div></div>`;
     const busy=scheds.filter(s=>!s.is_allday&&s.start_min!=null).sort((a,b)=>a.start_min-b.start_min);
     const hasAll=scheds.some(s=>s.is_allday);
-
     if(hasAll){
-      h+=`<div class="time-bar"><div style="padding:6px 8px;">
-        <div class="time-slots"><div class="time-slot busy" style="flex:1;font-size:10px;">全天忙碌</div></div>
-        <div class="time-labels"><div class="time-label">08:30</div><div class="time-label">12:00</div><div class="time-label">18:00</div></div></div>`;
-    } else if(busy.length){
-      let segs=[], cur=WORK_S;
-      busy.forEach(s=>{
-        if(s.start_min>cur) segs.push({t:'free',s:cur,e:s.start_min});
-        segs.push({t:'busy',s:Math.max(cur,s.start_min),e:s.end_min,title:s.title});
-        cur=Math.max(cur,s.end_min);
-      });
-      if(cur<WORK_E) segs.push({t:'free',s:cur,e:WORK_E});
-      const total=WORK_E-WORK_S;
-      h+=`<div class="time-bar"><div style="padding:6px 8px;"><div class="time-slots">`;
-      segs.forEach(seg=>{
-        const pct=((seg.e-seg.s)/total*100).toFixed(1);
-        const lb=seg.t==='busy'?(seg.title.length>6?seg.title.slice(0,6)+'…':seg.title):'空闲';
-        h+=`<div class="time-slot ${seg.t}" style="flex:${pct}">${pct>8?lb:''}</div>`;
-      });
-      h+=`</div><div class="time-labels"><div class="time-label">08:30</div><div class="time-label">12:00</div><div class="time-label">18:00</div></div></div>`;
+      h+=`<div class="time-bar" style="cursor:default;"><div style="padding:6px 8px;"><div class="time-slots"><div class="time-slot busy" style="flex:1;font-size:10px;">全天忙碌</div></div><div class="time-labels"><div class="time-label">08:30</div><div class="time-label">12:00</div><div class="time-label">18:00</div></div></div></div>`;
+    }else if(busy.length){
+      let segs=[],cur=WS;busy.forEach(s=>{if(s.start_min>cur)segs.push({t:'free',s:cur,e:s.start_min});segs.push({t:'busy',s:Math.max(cur,s.start_min),e:s.end_min,title:s.title});cur=Math.max(cur,s.end_min);});if(cur<WE)segs.push({t:'free',s:cur,e:WE});
+      const tot=WE-WS;h+=`<div class="time-bar" style="cursor:default;"><div style="padding:6px 8px;"><div class="time-slots">`;
+      segs.forEach(seg=>{const pct=((seg.e-seg.s)/tot*100).toFixed(1);const lb=seg.t==='busy'?(seg.title.length>6?seg.title.slice(0,6)+'…':seg.title):'空闲';h+=`<div class="time-slot ${seg.t}" style="flex:${pct}">${pct>8?lb:''}</div>`;});
+      h+=`</div><div class="time-labels"><div class="time-label">08:30</div><div class="time-label">12:00</div><div class="time-label">18:00</div></div></div></div>`;
     }
-
-    scheds.forEach(s=>{
-      h+=`<div class="sch-item"><div class="sch-time">${s.is_allday?'<span class="allday-tag">全天</span>':`<div class="t1">${s.start_time}</div><div class="t2">${s.end_time||''}</div>`}</div>
-        <div class="sch-body"><div class="sch-title">${s.title}</div>
-        ${s.location?`<div class="sch-meta">📍 ${s.location}</div>`:''}
-        ${s.participants?`<div class="sch-meta">👥 ${s.participants}</div>`:''}
-        ${s.notes?`<div class="sch-notes">📝 ${s.notes}</div>`:''}</div></div>`;
-    });
-    h+='</div></div>';
+    h+='<div class="time-bar">'+scheds.map(s=>schCard(s,false)).join('')+'</div></div>';
   }
-
-  // Free leaders
-  const free=leaders.filter(l=>!groups[l.name]);
-  if(free.length){
-    h+='<div style="margin-top:12px;padding:12px;background:white;border-radius:10px;">';
-    h+='<div style="font-size:12px;color:var(--text3);margin-bottom:8px;">🟢 以下领导当日暂无行程</div>';
-    h+='<div style="display:flex;flex-wrap:wrap;gap:8px;">';
-    free.forEach(l=>{h+=`<span style="font-size:12px;padding:3px 10px;border-radius:12px;background:${l.color}10;color:${l.color};font-weight:500;">${l.name}</span>`;});
-    h+='</div></div>';
-  }
-  h+='</div>';
-  document.getElementById('content').innerHTML=h;
+  const free=L.filter(l=>!groups[l.name]);
+  if(free.length){h+='<div style="margin-top:12px;padding:12px;background:white;border-radius:10px;"><div style="font-size:12px;color:var(--text3);margin-bottom:8px;">🟢 以下领导当日暂无行程</div><div style="display:flex;flex-wrap:wrap;gap:8px;">'+free.map(l=>`<span style="font-size:12px;padding:3px 10px;border-radius:12px;background:${l.color}10;color:${l.color};font-weight:500;">${l.name}</span>`).join('')+'</div></div>';}
+  h+='</div>';document.getElementById('ct').innerHTML=h;
 }
 
-function setLeaderFilter(n){ curLeader=n; render(); }
+function setLF(n){cl=n;render();}
 
-let touchY=0;
-document.addEventListener('touchstart',e=>{touchY=e.touches[0].clientY;});
-document.addEventListener('touchend',e=>{if(e.changedTouches[0].clientY-touchY>80&&window.scrollY===0)loadData();});
-setInterval(loadData,60000);
+// ---- Detail Modal ----
+function openDetail(id){
+  const s=D.find(x=>x.id===id);if(!s)return;
+  const l=L.find(x=>x.name===s.leader);const c=l?l.color:'#999';
+  document.getElementById('detailTitle').textContent=s.title;
+  let h='';
+  const row=(label,val,isTag)=>{
+    if(!val)return `<div class="detail-row"><div class="detail-label">${label}</div><div class="detail-value empty-val">未填写</div></div>`;
+    if(isTag)return `<div class="detail-row"><div class="detail-label">${label}</div><div class="detail-value"><span class="detail-tag" style="background:${c}15;color:${c};">${val}</span></div></div>`;
+    return `<div class="detail-row"><div class="detail-label">${label}</div><div class="detail-value">${val}</div></div>`;
+  };
+  h+=row('领导',s.leader,true);
+  h+=row('时间',s.is_allday?'全天':`${s.start_time}${s.end_time?' — '+s.end_time:''}`);
+  h+=row('日期',s.date+' 星期'+WD[new Date(s.date).getDay()]);
+  h+=row('地点',s.location);
+  h+=row('参与人',s.participants);
+  h+=row('陪同人',s.companion);
+  h+=row('筹备内容',s.preparation);
+  h+=row('车辆安排',s.vehicle);
+  h+=row('食宿安排',s.accommodation);
+  h+=row('重要程度',s.importance);
+  h+=row('备注',s.notes);
+  document.getElementById('detailBody').innerHTML=h;
+  document.getElementById('detailModal').classList.add('show');
+}
+function closeDetail(){document.getElementById('detailModal').classList.remove('show');}
+
+// ---- Create Modal ----
+function openCreate(){
+  document.getElementById('f_date').value=fmt(cd);
+  document.getElementById('createModal').classList.add('show');
+}
+function closeCreate(){document.getElementById('createModal').classList.remove('show');}
+
+async function submitCreate(e){
+  e.preventDefault();
+  const btn=document.getElementById('f_submit');btn.disabled=true;btn.textContent='提交中...';
+  try{
+    const body={
+      leader:document.getElementById('f_leader').value,
+      date:document.getElementById('f_date').value,
+      start_time:document.getElementById('f_start').value,
+      end_time:document.getElementById('f_end').value,
+      title:document.getElementById('f_title').value,
+      location:document.getElementById('f_location').value,
+      participants:document.getElementById('f_participants').value,
+      companion:document.getElementById('f_companion').value,
+      preparation:document.getElementById('f_preparation').value,
+      vehicle:document.getElementById('f_vehicle').value,
+      accommodation:document.getElementById('f_accommodation').value,
+      importance:document.getElementById('f_importance').value,
+      notes:document.getElementById('f_notes').value,
+    };
+    const r=await fetch('/api/schedules',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const d=await r.json();
+    if(d.success){closeCreate();document.getElementById('createForm').reset();load();}
+    else{alert('提交失败: '+(d.error||'未知错误'));}
+  }catch(err){alert('网络错误');}
+  btn.disabled=false;btn.textContent='提交录入';
+}
+
+// Close modal on mask click
+document.querySelectorAll('.modal-mask').forEach(m=>{m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('show');});});
+
+let ty=0;
+document.addEventListener('touchstart',e=>{ty=e.touches[0].clientY;});
+document.addEventListener('touchend',e=>{if(e.changedTouches[0].clientY-ty>80&&window.scrollY===0)load();});
+setInterval(load,60000);
 init();
 </script>
 </body>
