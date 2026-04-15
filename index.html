@@ -1,0 +1,1841 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>西影集团领导行程管理系统</title>
+<style>
+:root {
+  --primary: #C41E2F;
+  --primary-dark: #9B1824;
+  --primary-light: #F5E6E8;
+  --gold: #B8860B;
+  --gold-light: #FDF6E3;
+  --bg: #F5F5F5;
+  --card: #FFFFFF;
+  --text: #1A1A1A;
+  --text-secondary: #666666;
+  --border: #E8E8E8;
+  --success: #2E7D32;
+  --warning: #F57C00;
+  --danger: #C62828;
+  --info: #1565C0;
+  --shadow: 0 2px 12px rgba(0,0,0,0.08);
+  --radius: 12px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding-bottom: 80px;
+  overflow-x: hidden;
+}
+
+/* Header */
+.header {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: white;
+  padding: 16px 16px 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 4px 20px rgba(196, 30, 47, 0.3);
+}
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.header-title {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+.header-subtitle {
+  font-size: 11px;
+  opacity: 0.8;
+  margin-top: 2px;
+}
+.header-actions {
+  display: flex;
+  gap: 12px;
+}
+.header-btn {
+  background: rgba(255,255,255,0.2);
+  border: none;
+  color: white;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  transition: background 0.2s;
+}
+.header-btn:active { background: rgba(255,255,255,0.35); }
+
+/* Leader Tabs */
+.leader-tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 2px 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.leader-tabs::-webkit-scrollbar { display: none; }
+.leader-tab {
+  flex-shrink: 0;
+  background: rgba(255,255,255,0.15);
+  border: 1.5px solid rgba(255,255,255,0.3);
+  color: rgba(255,255,255,0.85);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.leader-tab.active {
+  background: white;
+  color: var(--primary);
+  border-color: white;
+  font-weight: 600;
+}
+.leader-tab .tab-badge {
+  display: inline-block;
+  background: rgba(255,255,255,0.3);
+  color: white;
+  font-size: 10px;
+  padding: 1px 5px;
+  border-radius: 8px;
+  margin-left: 4px;
+}
+.leader-tab.active .tab-badge {
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+/* Date Navigation */
+.date-nav {
+  background: white;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 88px;
+  z-index: 99;
+}
+.date-nav-btn {
+  background: none;
+  border: 1px solid var(--border);
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 16px;
+}
+.date-nav-btn:active { background: var(--bg); }
+.date-info {
+  text-align: center;
+  cursor: pointer;
+}
+.date-info .date-main {
+  font-size: 16px;
+  font-weight: 600;
+}
+.date-info .date-sub {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+.date-today-btn {
+  background: var(--primary-light);
+  color: var(--primary);
+  border: none;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+/* Week Strip */
+.week-strip {
+  background: white;
+  display: flex;
+  padding: 8px 8px 12px;
+  border-bottom: 1px solid var(--border);
+  gap: 2px;
+}
+.week-day {
+  flex: 1;
+  text-align: center;
+  padding: 6px 0;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.week-day:active { transform: scale(0.95); }
+.week-day .wd-name {
+  font-size: 10px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+.week-day .wd-num {
+  font-size: 15px;
+  font-weight: 500;
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  border-radius: 50%;
+  margin: 0 auto;
+}
+.week-day .wd-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--primary);
+  margin: 4px auto 0;
+  opacity: 0;
+}
+.week-day.has-event .wd-dot { opacity: 1; }
+.week-day.active .wd-num {
+  background: var(--primary);
+  color: white;
+}
+.week-day.today .wd-num {
+  border: 2px solid var(--primary);
+  color: var(--primary);
+  font-weight: 700;
+}
+.week-day.today.active .wd-num {
+  background: var(--primary);
+  color: white;
+}
+
+/* Reminder Banner */
+.reminder-banner {
+  background: linear-gradient(135deg, #FFF3E0, #FFE0B2);
+  margin: 12px 16px;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  border-left: 4px solid var(--warning);
+  display: none;
+}
+.reminder-banner.show { display: block; }
+.reminder-banner-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #E65100;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.reminder-item {
+  font-size: 12px;
+  color: #BF360C;
+  padding: 3px 0;
+  line-height: 1.5;
+}
+
+/* Schedule List */
+.schedule-section {
+  padding: 12px 16px;
+}
+.schedule-section-title {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.time-period-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.schedule-card {
+  background: white;
+  border-radius: var(--radius);
+  margin-bottom: 10px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  transition: transform 0.15s;
+  position: relative;
+}
+.schedule-card:active { transform: scale(0.98); }
+.schedule-card-accent {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+}
+.importance-high .schedule-card-accent { background: var(--danger); }
+.importance-medium .schedule-card-accent { background: var(--warning); }
+.importance-low .schedule-card-accent { background: var(--info); }
+.importance-normal .schedule-card-accent { background: #9E9E9E; }
+
+.schedule-card-body {
+  padding: 14px 14px 14px 18px;
+}
+.schedule-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+.schedule-card-time {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--primary-dark);
+}
+.schedule-card-importance {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+.importance-high .schedule-card-importance { background: #FFEBEE; color: var(--danger); }
+.importance-medium .schedule-card-importance { background: #FFF3E0; color: var(--warning); }
+.importance-low .schedule-card-importance { background: #E3F2FD; color: var(--info); }
+.importance-normal .schedule-card-importance { background: #F5F5F5; color: #757575; }
+
+.schedule-card-title {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  line-height: 1.4;
+}
+.schedule-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.schedule-card-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.schedule-card-notes {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border);
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+.schedule-card-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 10px;
+}
+.card-action-btn {
+  background: none;
+  border: 1px solid var(--border);
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.card-action-btn:active { background: var(--bg); }
+.card-action-btn.delete { color: var(--danger); border-color: #FFCDD2; }
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 60px 40px;
+  color: var(--text-secondary);
+}
+.empty-state-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.4;
+}
+.empty-state-text {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* FAB */
+.fab {
+  position: fixed;
+  bottom: 90px;
+  right: 20px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: white;
+  border: none;
+  font-size: 28px;
+  box-shadow: 0 6px 20px rgba(196, 30, 47, 0.4);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 90;
+  transition: transform 0.2s;
+}
+.fab:active { transform: scale(0.9); }
+
+/* Bottom Nav */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  display: flex;
+  border-top: 1px solid var(--border);
+  padding: 6px 0;
+  padding-bottom: max(6px, env(safe-area-inset-bottom));
+  z-index: 100;
+}
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4px 0;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: color 0.2s;
+  background: none;
+  border: none;
+  font-family: inherit;
+}
+.nav-item.active { color: var(--primary); }
+.nav-item-icon { font-size: 22px; margin-bottom: 2px; }
+.nav-item-text { font-size: 10px; }
+.nav-badge {
+  position: absolute;
+  top: 0;
+  right: 50%;
+  transform: translateX(14px);
+  background: var(--danger);
+  color: white;
+  font-size: 9px;
+  min-width: 16px;
+  height: 16px;
+  line-height: 16px;
+  border-radius: 8px;
+  text-align: center;
+  padding: 0 4px;
+}
+
+/* Modal */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 200;
+  justify-content: center;
+  align-items: flex-end;
+}
+.modal-overlay.show {
+  display: flex;
+  animation: fadeIn 0.2s;
+}
+.modal {
+  background: white;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  border-radius: 16px 16px 0 0;
+  overflow-y: auto;
+  animation: slideUp 0.3s ease;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 1;
+}
+.modal-title { font-size: 17px; font-weight: 700; }
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.modal-body { padding: 20px; }
+
+/* Form */
+.form-group {
+  margin-bottom: 18px;
+}
+.form-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.form-label .required {
+  color: var(--danger);
+  margin-left: 2px;
+}
+.form-input, .form-select, .form-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--text);
+  background: white;
+  transition: border-color 0.2s;
+  -webkit-appearance: none;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+.form-textarea { resize: vertical; min-height: 80px; }
+.form-row {
+  display: flex;
+  gap: 12px;
+}
+.form-row .form-group { flex: 1; }
+
+.importance-selector {
+  display: flex;
+  gap: 8px;
+}
+.importance-option {
+  flex: 1;
+  padding: 8px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  text-align: center;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.importance-option.selected {
+  font-weight: 600;
+}
+.importance-option[data-value="high"].selected {
+  border-color: var(--danger);
+  background: #FFEBEE;
+  color: var(--danger);
+}
+.importance-option[data-value="medium"].selected {
+  border-color: var(--warning);
+  background: #FFF3E0;
+  color: var(--warning);
+}
+.importance-option[data-value="low"].selected {
+  border-color: var(--info);
+  background: #E3F2FD;
+  color: var(--info);
+}
+.importance-option[data-value="normal"].selected {
+  border-color: #9E9E9E;
+  background: #F5F5F5;
+  color: #616161;
+}
+
+.reminder-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.reminder-chip {
+  padding: 6px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.reminder-chip.selected {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  color: var(--primary);
+  font-weight: 500;
+}
+
+.form-submit {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: opacity 0.2s;
+}
+.form-submit:active { opacity: 0.85; }
+
+/* View Pages */
+.page { display: none; }
+.page.active { display: block; }
+
+/* Leader Management */
+.leader-manage-list {
+  padding: 0 16px;
+}
+.leader-manage-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: white;
+  padding: 14px;
+  border-radius: var(--radius);
+  margin-bottom: 8px;
+  box-shadow: var(--shadow);
+}
+.leader-manage-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.leader-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--primary-light);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+}
+.leader-manage-name { font-size: 15px; font-weight: 600; }
+.leader-manage-role { font-size: 12px; color: var(--text-secondary); }
+.leader-manage-actions {
+  display: flex;
+  gap: 8px;
+}
+.leader-mgmt-btn {
+  background: none;
+  border: 1px solid var(--border);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  cursor: pointer;
+  color: var(--text-secondary);
+}
+.leader-mgmt-btn.delete { color: var(--danger); border-color: #FFCDD2; }
+
+/* Overview Stats */
+.overview-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 16px;
+}
+.stat-card {
+  background: white;
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+.stat-value { font-size: 28px; font-weight: 700; color: var(--primary); }
+.stat-label { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+
+/* Conflict Warning */
+.conflict-warning {
+  background: #FFEBEE;
+  border: 1px solid #FFCDD2;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 16px;
+  font-size: 12px;
+  color: var(--danger);
+  display: none;
+}
+.conflict-warning.show { display: block; }
+
+/* Toast */
+.toast {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0,0,0,0.78);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-size: 14px;
+  z-index: 999;
+  display: none;
+  text-align: center;
+  max-width: 260px;
+}
+.toast.show {
+  display: block;
+  animation: toastIn 0.3s ease;
+}
+@keyframes toastIn { from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
+
+/* Search */
+.search-bar {
+  padding: 12px 16px;
+  background: white;
+  border-bottom: 1px solid var(--border);
+}
+.search-input-wrap {
+  display: flex;
+  align-items: center;
+  background: var(--bg);
+  border-radius: 8px;
+  padding: 8px 12px;
+  gap: 8px;
+}
+.search-input-wrap input {
+  flex: 1;
+  border: none;
+  background: none;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+}
+.search-icon { color: var(--text-secondary); font-size: 16px; }
+
+/* Availability View */
+.availability-grid {
+  padding: 16px;
+}
+.avail-time-slot {
+  display: flex;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+.avail-time-label {
+  width: 60px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+.avail-bar {
+  flex: 1;
+  height: 32px;
+  background: #E8F5E9;
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+}
+.avail-bar.busy {
+  background: #FFEBEE;
+}
+.avail-bar-label {
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 11px;
+  font-weight: 500;
+}
+.avail-bar.busy .avail-bar-label { color: var(--danger); }
+.avail-bar:not(.busy) .avail-bar-label { color: var(--success); }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 0; height: 0; }
+
+/* Calendar Picker */
+.calendar-picker {
+  background: white;
+  border-radius: var(--radius);
+  padding: 16px;
+  margin: 12px 16px;
+  box-shadow: var(--shadow);
+}
+.cal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.cal-month { font-size: 16px; font-weight: 600; }
+.cal-nav-btn {
+  background: none;
+  border: 1px solid var(--border);
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+.cal-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+.cal-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  text-align: center;
+}
+.cal-day {
+  padding: 6px;
+  border-radius: 50%;
+  font-size: 13px;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  line-height: 20px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cal-day:hover { background: var(--bg); }
+.cal-day.today { border: 2px solid var(--primary); color: var(--primary); font-weight: 600; }
+.cal-day.selected { background: var(--primary); color: white; }
+.cal-day.other-month { color: #CCC; }
+.cal-day.has-event::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--primary);
+}
+</style>
+</head>
+<body>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Page: Schedule -->
+<div class="page active" id="page-schedule">
+  <div class="header">
+    <div class="header-top">
+      <div>
+        <div class="header-title">西影集团领导行程</div>
+        <div class="header-subtitle">党政办公室行程管理系统</div>
+      </div>
+      <div class="header-actions">
+        <button class="header-btn" onclick="showSearchModal()" title="搜索">&#128269;</button>
+        <button class="header-btn" onclick="showCalendarModal()" title="日历">&#128197;</button>
+      </div>
+    </div>
+    <div class="leader-tabs" id="leaderTabs"></div>
+  </div>
+
+  <div class="date-nav">
+    <button class="date-nav-btn" onclick="changeDate(-1)">&#9664;</button>
+    <div class="date-info" onclick="showCalendarModal()">
+      <div class="date-main" id="dateMain"></div>
+      <div class="date-sub" id="dateSub"></div>
+    </div>
+    <button class="date-today-btn" onclick="goToday()">今天</button>
+    <button class="date-nav-btn" onclick="changeDate(1)">&#9654;</button>
+  </div>
+
+  <div class="week-strip" id="weekStrip"></div>
+
+  <div class="reminder-banner" id="reminderBanner">
+    <div class="reminder-banner-title">&#9888;&#65039; 待办提醒</div>
+    <div id="reminderContent"></div>
+  </div>
+
+  <div id="scheduleList"></div>
+</div>
+
+<!-- Page: Availability -->
+<div class="page" id="page-availability">
+  <div class="header">
+    <div class="header-top">
+      <div>
+        <div class="header-title">档期查询</div>
+        <div class="header-subtitle">查看领导空闲时段</div>
+      </div>
+    </div>
+  </div>
+  <div class="date-nav">
+    <button class="date-nav-btn" onclick="changeAvailDate(-1)">&#9664;</button>
+    <div class="date-info">
+      <div class="date-main" id="availDateMain"></div>
+      <div class="date-sub" id="availDateSub"></div>
+    </div>
+    <button class="date-today-btn" onclick="goAvailToday()">今天</button>
+    <button class="date-nav-btn" onclick="changeAvailDate(1)">&#9654;</button>
+  </div>
+  <div class="leader-tabs" style="padding: 12px 16px; background: white; border-bottom: 1px solid var(--border);" id="availLeaderTabs"></div>
+  <div class="availability-grid" id="availGrid"></div>
+</div>
+
+<!-- Page: Leaders -->
+<div class="page" id="page-leaders">
+  <div class="header">
+    <div class="header-top">
+      <div>
+        <div class="header-title">领导班子</div>
+        <div class="header-subtitle">管理领导信息</div>
+      </div>
+      <div class="header-actions">
+        <button class="header-btn" onclick="showLeaderModal()">+</button>
+      </div>
+    </div>
+  </div>
+  <div style="padding-top: 12px;">
+    <div class="leader-manage-list" id="leaderManageList"></div>
+  </div>
+</div>
+
+<!-- Page: Reminders -->
+<div class="page" id="page-reminders">
+  <div class="header">
+    <div class="header-top">
+      <div>
+        <div class="header-title">提醒中心</div>
+        <div class="header-subtitle">待办事项与行程提醒</div>
+      </div>
+    </div>
+  </div>
+  <div id="reminderList" style="padding: 12px 16px;"></div>
+</div>
+
+<!-- FAB -->
+<button class="fab" id="fab" onclick="showAddModal()">+</button>
+
+<!-- Bottom Nav -->
+<div class="bottom-nav">
+  <button class="nav-item active" onclick="switchPage('schedule')">
+    <span class="nav-item-icon">&#128197;</span>
+    <span class="nav-item-text">行程</span>
+  </button>
+  <button class="nav-item" onclick="switchPage('availability')">
+    <span class="nav-item-icon">&#128336;</span>
+    <span class="nav-item-text">档期</span>
+  </button>
+  <button class="nav-item" onclick="switchPage('leaders')" style="position:relative;">
+    <span class="nav-item-icon">&#128101;</span>
+    <span class="nav-item-text">班子</span>
+  </button>
+  <button class="nav-item" onclick="switchPage('reminders')" style="position:relative;">
+    <span class="nav-item-icon">&#128276;</span>
+    <span class="nav-item-text">提醒</span>
+    <span class="nav-badge" id="reminderBadge" style="display:none;">0</span>
+  </button>
+</div>
+
+<!-- Add/Edit Schedule Modal -->
+<div class="modal-overlay" id="scheduleModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="scheduleModalTitle">新增行程</span>
+      <button class="modal-close" onclick="closeModal('scheduleModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="conflict-warning" id="conflictWarning">
+        &#9888; 该时段与已有行程存在冲突，请确认！
+      </div>
+      <form id="scheduleForm" onsubmit="saveSchedule(event)">
+        <input type="hidden" id="editId">
+        <div class="form-group">
+          <label class="form-label">所属领导 <span class="required">*</span></label>
+          <select class="form-select" id="formLeader" required></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">日期 <span class="required">*</span></label>
+          <input type="date" class="form-input" id="formDate" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">开始时间 <span class="required">*</span></label>
+            <input type="time" class="form-input" id="formStartTime" required onchange="checkConflict()">
+          </div>
+          <div class="form-group">
+            <label class="form-label">结束时间 <span class="required">*</span></label>
+            <input type="time" class="form-input" id="formEndTime" required onchange="checkConflict()">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">行程内容 <span class="required">*</span></label>
+          <input type="text" class="form-input" id="formTitle" placeholder="例：党委会议、政府座谈" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">地点</label>
+          <input type="text" class="form-input" id="formLocation" placeholder="例：集团三楼会议室">
+        </div>
+        <div class="form-group">
+          <label class="form-label">参与人员</label>
+          <input type="text" class="form-input" id="formAttendees" placeholder="例：张书记、省文旅厅李处长">
+        </div>
+        <div class="form-group">
+          <label class="form-label">重要程度</label>
+          <div class="importance-selector" id="importanceSelector">
+            <div class="importance-option" data-value="high" onclick="selectImportance('high')">紧急重要</div>
+            <div class="importance-option selected" data-value="medium" onclick="selectImportance('medium')">重要</div>
+            <div class="importance-option" data-value="low" onclick="selectImportance('low')">一般</div>
+            <div class="importance-option" data-value="normal" onclick="selectImportance('normal')">日常</div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">提前提醒</label>
+          <div class="reminder-selector" id="reminderSelector">
+            <div class="reminder-chip" data-value="30" onclick="toggleReminder(this)">30分钟</div>
+            <div class="reminder-chip selected" data-value="60" onclick="toggleReminder(this)">1小时</div>
+            <div class="reminder-chip" data-value="180" onclick="toggleReminder(this)">3小时</div>
+            <div class="reminder-chip selected" data-value="720" onclick="toggleReminder(this)">半天</div>
+            <div class="reminder-chip" data-value="1440" onclick="toggleReminder(this)">1天</div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">准备事项</label>
+          <textarea class="form-textarea" id="formPrep" placeholder="需要提前准备的材料、文件等"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">备注</label>
+          <textarea class="form-textarea" id="formNotes" placeholder="其他需要注意的事项" style="min-height: 60px;"></textarea>
+        </div>
+        <button type="submit" class="form-submit" id="formSubmitBtn">保存行程</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Leader Modal -->
+<div class="modal-overlay" id="leaderModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="leaderModalTitle">添加领导</span>
+      <button class="modal-close" onclick="closeModal('leaderModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form id="leaderForm" onsubmit="saveLeader(event)">
+        <input type="hidden" id="editLeaderId">
+        <div class="form-group">
+          <label class="form-label">姓名 <span class="required">*</span></label>
+          <input type="text" class="form-input" id="leaderName" placeholder="例：张三" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">职务 <span class="required">*</span></label>
+          <input type="text" class="form-input" id="leaderRole" placeholder="例：党委书记、董事长" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">排序（数字越小越靠前）</label>
+          <input type="number" class="form-input" id="leaderOrder" value="1" min="1">
+        </div>
+        <button type="submit" class="form-submit">保存</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Calendar Modal -->
+<div class="modal-overlay" id="calendarModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">选择日期</span>
+      <button class="modal-close" onclick="closeModal('calendarModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="calendar-picker" id="calendarPicker"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Search Modal -->
+<div class="modal-overlay" id="searchModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">搜索行程</span>
+      <button class="modal-close" onclick="closeModal('searchModal')">&times;</button>
+    </div>
+    <div class="search-bar">
+      <div class="search-input-wrap">
+        <span class="search-icon">&#128269;</span>
+        <input type="text" placeholder="搜索行程内容、地点、人员..." id="searchInput" oninput="doSearch()">
+      </div>
+    </div>
+    <div id="searchResults" style="padding: 12px 16px; max-height: 400px; overflow-y: auto;"></div>
+  </div>
+</div>
+
+<script>
+// ========== Data Layer ==========
+const STORAGE_KEY = 'xygroup_schedule';
+const LEADERS_KEY = 'xygroup_leaders';
+
+function loadData() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch { return []; }
+}
+function saveData(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+function loadLeaders() {
+  try {
+    const leaders = JSON.parse(localStorage.getItem(LEADERS_KEY));
+    if (leaders && leaders.length) return leaders;
+  } catch {}
+  // Default leaders
+  const defaults = [
+    { id: 'l1', name: '赵书记', role: '党委书记', order: 1 },
+    { id: 'l2', name: '钱董事长', role: '董事长', order: 2 },
+    { id: 'l3', name: '孙总经理', role: '总经理', order: 3 },
+    { id: 'l4', name: '李副书记', role: '纪委书记/副书记', order: 4 },
+    { id: 'l5', name: '周副总', role: '副总经理', order: 5 },
+    { id: 'l6', name: '吴总会', role: '总会计师', order: 6 },
+  ];
+  localStorage.setItem(LEADERS_KEY, JSON.stringify(defaults));
+  return defaults;
+}
+function saveLeaders(leaders) {
+  localStorage.setItem(LEADERS_KEY, JSON.stringify(leaders));
+}
+
+// ========== State ==========
+let schedules = loadData();
+let leaders = loadLeaders();
+let currentDate = new Date();
+let selectedLeaderId = 'all';
+let currentPage = 'schedule';
+let availDate = new Date();
+let availLeaderId = null;
+let calMonth = new Date();
+
+// ========== Utilities ==========
+function genId() { return 'sc_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6); }
+function fmt2(n) { return n.toString().padStart(2, '0'); }
+function dateStr(d) { return `${d.getFullYear()}-${fmt2(d.getMonth()+1)}-${fmt2(d.getDate())}`; }
+function isToday(d) { return dateStr(d) === dateStr(new Date()); }
+function isSameDay(a, b) { return dateStr(a) === dateStr(b); }
+const WEEKDAYS = ['日','一','二','三','四','五','六'];
+const IMPORTANCE_MAP = { high: '紧急重要', medium: '重要', low: '一般', normal: '日常' };
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+function getSchedulesForDate(date, leaderId) {
+  const ds = dateStr(date);
+  return schedules.filter(s => s.date === ds && (leaderId === 'all' || s.leaderId === leaderId))
+    .sort((a, b) => a.startTime.localeCompare(b.startTime));
+}
+
+// ========== Rendering ==========
+function renderLeaderTabs() {
+  const container = document.getElementById('leaderTabs');
+  const today = dateStr(currentDate);
+  let html = `<div class="leader-tab ${selectedLeaderId === 'all' ? 'active' : ''}" onclick="selectLeader('all')">全部<span class="tab-badge">${schedules.filter(s=>s.date===today).length}</span></div>`;
+  leaders.sort((a,b) => a.order - b.order).forEach(l => {
+    const count = schedules.filter(s => s.date === today && s.leaderId === l.id).length;
+    html += `<div class="leader-tab ${selectedLeaderId === l.id ? 'active' : ''}" onclick="selectLeader('${l.id}')">${l.name}<span class="tab-badge">${count}</span></div>`;
+  });
+  container.innerHTML = html;
+}
+
+function renderDateNav() {
+  const d = currentDate;
+  document.getElementById('dateMain').textContent = `${d.getMonth()+1}月${d.getDate()}日 周${WEEKDAYS[d.getDay()]}`;
+  document.getElementById('dateSub').textContent = isToday(d) ? '今天' : d.getFullYear() + '年';
+}
+
+function renderWeekStrip() {
+  const container = document.getElementById('weekStrip');
+  const d = new Date(currentDate);
+  const dayOfWeek = d.getDay();
+  const monday = new Date(d);
+  monday.setDate(d.getDate() - ((dayOfWeek + 6) % 7));
+
+  let html = '';
+  for (let i = 0; i < 7; i++) {
+    const day = new Date(monday);
+    day.setDate(monday.getDate() + i);
+    const ds = dateStr(day);
+    const hasEvent = schedules.some(s => s.date === ds && (selectedLeaderId === 'all' || s.leaderId === selectedLeaderId));
+    const isActive = isSameDay(day, currentDate);
+    const isTodayClass = isToday(day) ? 'today' : '';
+    html += `<div class="week-day ${isActive ? 'active' : ''} ${isTodayClass} ${hasEvent ? 'has-event' : ''}" onclick="jumpToDate('${ds}')">
+      <div class="wd-name">${WEEKDAYS[(i+1)%7 === 0 ? 0 : (i+1)%7]}</div>
+      <div class="wd-num">${day.getDate()}</div>
+      <div class="wd-dot"></div>
+    </div>`;
+  }
+  container.innerHTML = html;
+}
+
+function renderScheduleList() {
+  const items = getSchedulesForDate(currentDate, selectedLeaderId);
+  const container = document.getElementById('scheduleList');
+
+  if (items.length === 0) {
+    container.innerHTML = `<div class="empty-state">
+      <div class="empty-state-icon">&#128203;</div>
+      <div class="empty-state-text">当日暂无行程安排<br>点击下方 "+" 添加新行程</div>
+    </div>`;
+    return;
+  }
+
+  // Group by morning/afternoon/evening
+  const morning = items.filter(s => s.startTime < '12:00');
+  const afternoon = items.filter(s => s.startTime >= '12:00' && s.startTime < '18:00');
+  const evening = items.filter(s => s.startTime >= '18:00');
+
+  let html = '';
+  if (morning.length) {
+    html += `<div class="schedule-section"><div class="schedule-section-title"><span class="time-period-dot" style="background:#FF9800"></span> 上午 (${morning.length}项)</div>`;
+    morning.forEach(s => html += renderCard(s));
+    html += '</div>';
+  }
+  if (afternoon.length) {
+    html += `<div class="schedule-section"><div class="schedule-section-title"><span class="time-period-dot" style="background:#2196F3"></span> 下午 (${afternoon.length}项)</div>`;
+    afternoon.forEach(s => html += renderCard(s));
+    html += '</div>';
+  }
+  if (evening.length) {
+    html += `<div class="schedule-section"><div class="schedule-section-title"><span class="time-period-dot" style="background:#673AB7"></span> 晚间 (${evening.length}项)</div>`;
+    evening.forEach(s => html += renderCard(s));
+    html += '</div>';
+  }
+  container.innerHTML = html;
+}
+
+function renderCard(s) {
+  const leader = leaders.find(l => l.id === s.leaderId);
+  const leaderName = leader ? leader.name : '未知';
+  return `<div class="schedule-card importance-${s.importance}" onclick="showEditModal('${s.id}')">
+    <div class="schedule-card-accent"></div>
+    <div class="schedule-card-body">
+      <div class="schedule-card-header">
+        <div class="schedule-card-time">${s.startTime} - ${s.endTime}</div>
+        <span class="schedule-card-importance">${IMPORTANCE_MAP[s.importance]}</span>
+      </div>
+      <div class="schedule-card-title">${escHtml(s.title)}</div>
+      <div class="schedule-card-meta">
+        ${selectedLeaderId === 'all' ? `<div class="schedule-card-meta-item">&#128100; ${escHtml(leaderName)}</div>` : ''}
+        ${s.location ? `<div class="schedule-card-meta-item">&#128205; ${escHtml(s.location)}</div>` : ''}
+        ${s.attendees ? `<div class="schedule-card-meta-item">&#128101; ${escHtml(s.attendees)}</div>` : ''}
+      </div>
+      ${s.prep ? `<div class="schedule-card-notes"><strong>准备事项：</strong>${escHtml(s.prep)}</div>` : ''}
+      ${s.notes ? `<div class="schedule-card-notes">${escHtml(s.notes)}</div>` : ''}
+    </div>
+  </div>`;
+}
+
+function escHtml(str) {
+  if (!str) return '';
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function renderReminders() {
+  const now = new Date();
+  const upcoming = [];
+  schedules.forEach(s => {
+    if (!s.reminders || !s.reminders.length) return;
+    const eventTime = new Date(s.date + 'T' + s.startTime);
+    s.reminders.forEach(mins => {
+      const reminderTime = new Date(eventTime.getTime() - mins * 60000);
+      if (reminderTime > now && reminderTime.getTime() - now.getTime() < 24 * 3600000) {
+        const leader = leaders.find(l => l.id === s.leaderId);
+        upcoming.push({
+          ...s,
+          leaderName: leader ? leader.name : '未知',
+          reminderTime,
+          minutesBefore: mins,
+          timeUntil: Math.round((reminderTime.getTime() - now.getTime()) / 60000)
+        });
+      }
+    });
+  });
+
+  upcoming.sort((a, b) => a.reminderTime - b.reminderTime);
+
+  // Banner on schedule page
+  const banner = document.getElementById('reminderBanner');
+  const content = document.getElementById('reminderContent');
+  if (upcoming.length > 0) {
+    banner.classList.add('show');
+    content.innerHTML = upcoming.slice(0, 3).map(r =>
+      `<div class="reminder-item">&#9201; ${r.leaderName}【${r.title}】${formatTimeUntil(r.timeUntil)}后需提醒${r.prep ? ' | 准备：' + r.prep : ''}</div>`
+    ).join('');
+  } else {
+    banner.classList.remove('show');
+  }
+
+  // Reminder badge
+  const badge = document.getElementById('reminderBadge');
+  if (upcoming.length > 0) {
+    badge.style.display = 'block';
+    badge.textContent = upcoming.length;
+  } else {
+    badge.style.display = 'none';
+  }
+
+  // Reminder page
+  const list = document.getElementById('reminderList');
+  if (upcoming.length === 0) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">&#128276;</div><div class="empty-state-text">暂无待办提醒<br>所有行程提醒将在这里显示</div></div>';
+  } else {
+    list.innerHTML = upcoming.map(r => `
+      <div class="schedule-card importance-${r.importance}" style="margin-bottom:10px;">
+        <div class="schedule-card-accent"></div>
+        <div class="schedule-card-body">
+          <div class="schedule-card-header">
+            <div class="schedule-card-time">${formatTimeUntil(r.timeUntil)}后</div>
+            <span class="schedule-card-importance">${IMPORTANCE_MAP[r.importance]}</span>
+          </div>
+          <div class="schedule-card-title">${escHtml(r.leaderName)} - ${escHtml(r.title)}</div>
+          <div class="schedule-card-meta">
+            <div class="schedule-card-meta-item">&#128197; ${r.date} ${r.startTime}-${r.endTime}</div>
+            ${r.location ? `<div class="schedule-card-meta-item">&#128205; ${escHtml(r.location)}</div>` : ''}
+          </div>
+          ${r.prep ? `<div class="schedule-card-notes"><strong>需准备：</strong>${escHtml(r.prep)}</div>` : ''}
+        </div>
+      </div>
+    `).join('');
+  }
+}
+
+function formatTimeUntil(mins) {
+  if (mins < 60) return `${mins}分钟`;
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  return m > 0 ? `${h}小时${m}分钟` : `${h}小时`;
+}
+
+// ========== Availability Page ==========
+function renderAvailability() {
+  if (!availLeaderId) availLeaderId = leaders.length > 0 ? leaders[0].id : null;
+
+  // Tabs
+  const tabsContainer = document.getElementById('availLeaderTabs');
+  tabsContainer.innerHTML = leaders.map(l =>
+    `<div class="leader-tab ${availLeaderId === l.id ? 'active' : ''}" onclick="selectAvailLeader('${l.id}')" style="border-color: ${availLeaderId === l.id ? 'var(--primary)' : 'var(--border)'}; color: ${availLeaderId === l.id ? 'var(--primary)' : 'var(--text-secondary)'}; background: ${availLeaderId === l.id ? 'var(--primary-light)' : 'white'};">${l.name}</div>`
+  ).join('');
+
+  // Date
+  const d = availDate;
+  document.getElementById('availDateMain').textContent = `${d.getMonth()+1}月${d.getDate()}日 周${WEEKDAYS[d.getDay()]}`;
+  document.getElementById('availDateSub').textContent = d.getFullYear() + '年';
+
+  // Grid
+  const grid = document.getElementById('availGrid');
+  if (!availLeaderId) {
+    grid.innerHTML = '<div class="empty-state"><div class="empty-state-text">请先添加领导信息</div></div>';
+    return;
+  }
+
+  const daySchedules = schedules.filter(s => s.date === dateStr(availDate) && s.leaderId === availLeaderId)
+    .sort((a,b) => a.startTime.localeCompare(b.startTime));
+
+  const slots = [];
+  for (let h = 8; h <= 21; h++) {
+    for (let m = 0; m < 60; m += 30) {
+      const timeStr = `${fmt2(h)}:${fmt2(m)}`;
+      const endStr = m === 30 ? `${fmt2(h+1)}:00` : `${fmt2(h)}:30`;
+      const busy = daySchedules.find(s => s.startTime < endStr && s.endTime > timeStr);
+      slots.push({ time: timeStr, busy, label: busy ? busy.title : '空闲' });
+    }
+  }
+
+  grid.innerHTML = slots.map(s => `
+    <div class="avail-time-slot">
+      <div class="avail-time-label">${s.time}</div>
+      <div class="avail-bar ${s.busy ? 'busy' : ''}">
+        <span class="avail-bar-label">${s.busy ? escHtml(s.label) : '空闲'}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ========== Leader Management ==========
+function renderLeaderList() {
+  const container = document.getElementById('leaderManageList');
+  if (leaders.length === 0) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-state-text">暂无领导信息，请点击右上角添加</div></div>';
+    return;
+  }
+  container.innerHTML = leaders.sort((a,b) => a.order - b.order).map(l => `
+    <div class="leader-manage-item">
+      <div class="leader-manage-info">
+        <div class="leader-avatar">${l.name[0]}</div>
+        <div>
+          <div class="leader-manage-name">${escHtml(l.name)}</div>
+          <div class="leader-manage-role">${escHtml(l.role)}</div>
+        </div>
+      </div>
+      <div class="leader-manage-actions">
+        <button class="leader-mgmt-btn" onclick="editLeader('${l.id}')">编辑</button>
+        <button class="leader-mgmt-btn delete" onclick="deleteLeader('${l.id}')">删除</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ========== Calendar ==========
+function renderCalendar() {
+  const container = document.getElementById('calendarPicker');
+  const year = calMonth.getFullYear();
+  const month = calMonth.getMonth();
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  const startDay = (firstDay.getDay() + 6) % 7; // Monday first
+
+  let html = `<div class="cal-header">
+    <button class="cal-nav-btn" onclick="calNav(-1)">&#9664;</button>
+    <div class="cal-month">${year}年${month+1}月</div>
+    <button class="cal-nav-btn" onclick="calNav(1)">&#9654;</button>
+  </div>
+  <div class="cal-weekdays"><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div><div>日</div></div>
+  <div class="cal-days">`;
+
+  // Previous month days
+  const prevLast = new Date(year, month, 0).getDate();
+  for (let i = 0; i < startDay; i++) {
+    html += `<div class="cal-day other-month">${prevLast - startDay + 1 + i}</div>`;
+  }
+
+  // Current month days
+  for (let d = 1; d <= lastDay.getDate(); d++) {
+    const date = new Date(year, month, d);
+    const ds = dateStr(date);
+    const isTodayCls = isToday(date) ? 'today' : '';
+    const isSelected = isSameDay(date, currentDate) ? 'selected' : '';
+    html += `<div class="cal-day ${isTodayCls} ${isSelected}" onclick="pickDate('${ds}')">${d}</div>`;
+  }
+
+  // Next month fill
+  const totalCells = startDay + lastDay.getDate();
+  const remaining = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+  for (let i = 1; i <= remaining; i++) {
+    html += `<div class="cal-day other-month">${i}</div>`;
+  }
+
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+// ========== Event Handlers ==========
+function selectLeader(id) {
+  selectedLeaderId = id;
+  renderAll();
+}
+
+function changeDate(delta) {
+  currentDate.setDate(currentDate.getDate() + delta);
+  renderAll();
+}
+
+function goToday() {
+  currentDate = new Date();
+  renderAll();
+}
+
+function jumpToDate(ds) {
+  currentDate = new Date(ds + 'T00:00:00');
+  renderAll();
+}
+
+function switchPage(page) {
+  currentPage = page;
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach((n, i) => {
+    n.classList.toggle('active', ['schedule','availability','leaders','reminders'][i] === page);
+  });
+  document.getElementById('fab').style.display = page === 'schedule' ? 'flex' : 'none';
+  if (page === 'availability') renderAvailability();
+  if (page === 'leaders') renderLeaderList();
+  if (page === 'reminders') renderReminders();
+}
+
+function selectAvailLeader(id) {
+  availLeaderId = id;
+  renderAvailability();
+}
+
+function changeAvailDate(delta) {
+  availDate.setDate(availDate.getDate() + delta);
+  renderAvailability();
+}
+
+function goAvailToday() {
+  availDate = new Date();
+  renderAvailability();
+}
+
+function calNav(delta) {
+  calMonth.setMonth(calMonth.getMonth() + delta);
+  renderCalendar();
+}
+
+function pickDate(ds) {
+  currentDate = new Date(ds + 'T00:00:00');
+  closeModal('calendarModal');
+  renderAll();
+}
+
+// ========== Modals ==========
+function showModal(id) {
+  document.getElementById(id).classList.add('show');
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('show');
+}
+
+function showAddModal() {
+  document.getElementById('scheduleModalTitle').textContent = '新增行程';
+  document.getElementById('editId').value = '';
+  document.getElementById('scheduleForm').reset();
+  document.getElementById('formDate').value = dateStr(currentDate);
+  document.getElementById('conflictWarning').classList.remove('show');
+  selectImportance('medium');
+  // Reset reminders
+  document.querySelectorAll('#reminderSelector .reminder-chip').forEach(c => {
+    c.classList.toggle('selected', c.dataset.value === '60' || c.dataset.value === '720');
+  });
+  populateLeaderSelect();
+  if (selectedLeaderId !== 'all') {
+    document.getElementById('formLeader').value = selectedLeaderId;
+  }
+  document.getElementById('formSubmitBtn').textContent = '保存行程';
+  showModal('scheduleModal');
+}
+
+function showEditModal(id) {
+  const s = schedules.find(x => x.id === id);
+  if (!s) return;
+  document.getElementById('scheduleModalTitle').textContent = '编辑行程';
+  document.getElementById('editId').value = id;
+  document.getElementById('formDate').value = s.date;
+  document.getElementById('formStartTime').value = s.startTime;
+  document.getElementById('formEndTime').value = s.endTime;
+  document.getElementById('formTitle').value = s.title;
+  document.getElementById('formLocation').value = s.location || '';
+  document.getElementById('formAttendees').value = s.attendees || '';
+  document.getElementById('formPrep').value = s.prep || '';
+  document.getElementById('formNotes').value = s.notes || '';
+  document.getElementById('conflictWarning').classList.remove('show');
+  selectImportance(s.importance);
+  populateLeaderSelect();
+  document.getElementById('formLeader').value = s.leaderId;
+  // Reminders
+  document.querySelectorAll('#reminderSelector .reminder-chip').forEach(c => {
+    c.classList.toggle('selected', (s.reminders || []).includes(parseInt(c.dataset.value)));
+  });
+  document.getElementById('formSubmitBtn').textContent = '更新行程';
+  showModal('scheduleModal');
+}
+
+function showLeaderModal(id) {
+  document.getElementById('leaderForm').reset();
+  document.getElementById('editLeaderId').value = '';
+  document.getElementById('leaderModalTitle').textContent = '添加领导';
+  if (id) {
+    const l = leaders.find(x => x.id === id);
+    if (l) {
+      document.getElementById('editLeaderId').value = l.id;
+      document.getElementById('leaderName').value = l.name;
+      document.getElementById('leaderRole').value = l.role;
+      document.getElementById('leaderOrder').value = l.order;
+      document.getElementById('leaderModalTitle').textContent = '编辑领导';
+    }
+  }
+  showModal('leaderModal');
+}
+
+function showCalendarModal() {
+  calMonth = new Date(currentDate);
+  renderCalendar();
+  showModal('calendarModal');
+}
+
+function showSearchModal() {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('searchResults').innerHTML = '';
+  showModal('searchModal');
+  setTimeout(() => document.getElementById('searchInput').focus(), 300);
+}
+
+function populateLeaderSelect() {
+  const sel = document.getElementById('formLeader');
+  sel.innerHTML = leaders.sort((a,b) => a.order - b.order).map(l =>
+    `<option value="${l.id}">${l.name} - ${l.role}</option>`
+  ).join('');
+}
+
+// ========== Form Actions ==========
+function selectImportance(val) {
+  document.querySelectorAll('#importanceSelector .importance-option').forEach(el => {
+    el.classList.toggle('selected', el.dataset.value === val);
+  });
+}
+
+function toggleReminder(el) {
+  el.classList.toggle('selected');
+}
+
+function getSelectedImportance() {
+  const el = document.querySelector('#importanceSelector .importance-option.selected');
+  return el ? el.dataset.value : 'medium';
+}
+
+function getSelectedReminders() {
+  return Array.from(document.querySelectorAll('#reminderSelector .reminder-chip.selected'))
+    .map(el => parseInt(el.dataset.value));
+}
+
+function checkConflict() {
+  const leaderId = document.getElementById('formLeader').value;
+  const date = document.getElementById('formDate').value;
+  const start = document.getElementById('formStartTime').value;
+  const end = document.getElementById('formEndTime').value;
+  const editId = document.getElementById('editId').value;
+
+  if (!leaderId || !date || !start || !end) return;
+
+  const conflict = schedules.find(s =>
+    s.leaderId === leaderId && s.date === date && s.id !== editId &&
+    s.startTime < end && s.endTime > start
+  );
+
+  document.getElementById('conflictWarning').classList.toggle('show', !!conflict);
+}
+
+function saveSchedule(e) {
+  e.preventDefault();
+  const editId = document.getElementById('editId').value;
+  const data = {
+    id: editId || genId(),
+    leaderId: document.getElementById('formLeader').value,
+    date: document.getElementById('formDate').value,
+    startTime: document.getElementById('formStartTime').value,
+    endTime: document.getElementById('formEndTime').value,
+    title: document.getElementById('formTitle').value,
+    location: document.getElementById('formLocation').value,
+    attendees: document.getElementById('formAttendees').value,
+    importance: getSelectedImportance(),
+    reminders: getSelectedReminders(),
+    prep: document.getElementById('formPrep').value,
+    notes: document.getElementById('formNotes').value,
+    createdAt: editId ? (schedules.find(s => s.id === editId) || {}).createdAt || new Date().toISOString() : new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+
+  if (editId) {
+    schedules = schedules.map(s => s.id === editId ? data : s);
+    showToast('行程已更新');
+  } else {
+    schedules.push(data);
+    showToast('行程已添加');
+  }
+
+  saveData(schedules);
+  closeModal('scheduleModal');
+  renderAll();
+}
+
+function deleteSchedule(id) {
+  if (!confirm('确定删除此行程？')) return;
+  schedules = schedules.filter(s => s.id !== id);
+  saveData(schedules);
+  closeModal('scheduleModal');
+  renderAll();
+  showToast('行程已删除');
+}
+
+function saveLeader(e) {
+  e.preventDefault();
+  const editId = document.getElementById('editLeaderId').value;
+  const data = {
+    id: editId || 'l_' + Date.now(),
+    name: document.getElementById('leaderName').value,
+    role: document.getElementById('leaderRole').value,
+    order: parseInt(document.getElementById('leaderOrder').value) || 1
+  };
+
+  if (editId) {
+    leaders = leaders.map(l => l.id === editId ? data : l);
+    showToast('已更新');
+  } else {
+    leaders.push(data);
+    showToast('已添加');
+  }
+
+  saveLeaders(leaders);
+  closeModal('leaderModal');
+  renderLeaderList();
+  renderLeaderTabs();
+}
+
+function editLeader(id) {
+  showLeaderModal(id);
+}
+
+function deleteLeader(id) {
+  const l = leaders.find(x => x.id === id);
+  if (!confirm(`确定删除 ${l ? l.name : ''} 吗？相关行程不会被删除。`)) return;
+  leaders = leaders.filter(x => x.id !== id);
+  saveLeaders(leaders);
+  renderLeaderList();
+  renderLeaderTabs();
+  showToast('已删除');
+}
+
+// ========== Search ==========
+function doSearch() {
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  const container = document.getElementById('searchResults');
+  if (!q) { container.innerHTML = ''; return; }
+
+  const results = schedules.filter(s =>
+    (s.title && s.title.toLowerCase().includes(q)) ||
+    (s.location && s.location.toLowerCase().includes(q)) ||
+    (s.attendees && s.attendees.toLowerCase().includes(q)) ||
+    (s.notes && s.notes.toLowerCase().includes(q)) ||
+    (s.prep && s.prep.toLowerCase().includes(q))
+  ).sort((a,b) => b.date.localeCompare(a.date)).slice(0, 20);
+
+  if (results.length === 0) {
+    container.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:30px;">未找到相关行程</div>';
+    return;
+  }
+
+  container.innerHTML = results.map(s => {
+    const leader = leaders.find(l => l.id === s.leaderId);
+    return `<div class="schedule-card importance-${s.importance}" style="margin-bottom:8px;" onclick="closeModal('searchModal');currentDate=new Date('${s.date}T00:00:00');selectedLeaderId='all';renderAll();">
+      <div class="schedule-card-accent"></div>
+      <div class="schedule-card-body" style="padding: 10px 10px 10px 16px;">
+        <div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px;">${s.date} ${s.startTime}-${s.endTime} | ${leader ? leader.name : ''}</div>
+        <div style="font-size:14px;font-weight:600;">${escHtml(s.title)}</div>
+        ${s.location ? `<div style="font-size:11px;color:var(--text-secondary);margin-top:2px;">&#128205; ${escHtml(s.location)}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ========== Notification System ==========
+function checkNotifications() {
+  if (!('Notification' in window)) return;
+  if (Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+
+  const now = new Date();
+  schedules.forEach(s => {
+    if (!s.reminders || !s.reminders.length) return;
+    const eventTime = new Date(s.date + 'T' + s.startTime);
+    s.reminders.forEach(mins => {
+      const reminderTime = new Date(eventTime.getTime() - mins * 60000);
+      const diff = reminderTime.getTime() - now.getTime();
+      if (diff > 0 && diff < 60000) { // Within 1 minute
+        const leader = leaders.find(l => l.id === s.leaderId);
+        if (Notification.permission === 'granted') {
+          new Notification(`行程提醒 - ${leader ? leader.name : ''}`, {
+            body: `${s.title}\n${s.startTime}-${s.endTime} ${s.location || ''}\n${s.prep ? '准备：' + s.prep : ''}`,
+            icon: '&#128197;',
+            tag: s.id + '_' + mins
+          });
+        }
+      }
+    });
+  });
+}
+
+// ========== Demo Data ==========
+function initDemoData() {
+  if (schedules.length > 0) return;
+  const today = dateStr(new Date());
+  const tomorrow = dateStr(new Date(Date.now() + 86400000));
+
+  const demoData = [
+    { id: genId(), leaderId: 'l1', date: today, startTime: '09:00', endTime: '10:30', title: '党委会议 - 审议年度工作报告', location: '集团三楼会议室', attendees: '全体班子成员', importance: 'high', reminders: [60, 720], prep: '年度工作报告初稿、财务报表、人事方案', notes: '需提前打印25份材料', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    { id: genId(), leaderId: 'l1', date: today, startTime: '14:00', endTime: '15:30', title: '会见省文旅厅领导', location: '贵宾接待室', attendees: '省文旅厅张厅长、办公室主任', importance: 'high', reminders: [60, 720, 1440], prep: '集团宣传册、近期重点项目PPT、茶歇安排', notes: '讨论文化产业合作框架协议', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    { id: genId(), leaderId: 'l2', date: today, startTime: '10:00', endTime: '11:30', title: '董事会专题研讨', location: '五楼董事会议室', attendees: '全体董事', importance: 'high', reminders: [60, 720], prep: '投资计划书、风险评估报告', notes: '', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    { id: genId(), leaderId: 'l2', date: today, startTime: '15:00', endTime: '16:00', title: '与银行洽谈融资事宜', location: '外出 - 工商银行省分行', attendees: '财务总监、银行客户经理', importance: 'medium', reminders: [60, 180], prep: '企业财务报表、资产证明、项目可行性报告', notes: '需安排车辆', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    { id: genId(), leaderId: 'l3', date: today, startTime: '09:30', endTime: '11:00', title: '生产调度会', location: '生产指挥中心', attendees: '各子公司负责人', importance: 'medium', reminders: [60], prep: '生产进度表、质量报告', notes: '', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    { id: genId(), leaderId: 'l3', date: today, startTime: '14:30', endTime: '16:00', title: '新项目立项评审', location: '集团三楼会议室', attendees: '项目部、财务部、法务部', importance: 'medium', reminders: [60, 720], prep: '项目立项申请书、预算方案', notes: '', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    { id: genId(), leaderId: 'l1', date: tomorrow, startTime: '09:00', endTime: '11:00', title: '中心组理论学习', location: '党建活动室', attendees: '全体班子成员', importance: 'medium', reminders: [60, 720], prep: '学习材料已发至各位邮箱', notes: '', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    { id: genId(), leaderId: 'l1', date: tomorrow, startTime: '14:00', endTime: '17:00', title: '赴省国资委汇报工作', location: '省国资委', attendees: '董事长、总经理', importance: 'high', reminders: [60, 720, 1440], prep: '工作汇报PPT、半年度经营数据、重点项目进展', notes: '需提前与国资委办公室确认时间', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  ];
+
+  schedules = demoData;
+  saveData(schedules);
+}
+
+// ========== Init ==========
+function renderAll() {
+  renderLeaderTabs();
+  renderDateNav();
+  renderWeekStrip();
+  renderScheduleList();
+  renderReminders();
+}
+
+initDemoData();
+renderAll();
+
+// Check reminders every minute
+setInterval(() => {
+  checkNotifications();
+  renderReminders();
+}, 60000);
+checkNotifications();
+
+// Close modal on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', function(e) {
+    if (e.target === this) {
+      this.classList.remove('show');
+    }
+  });
+});
+</script>
+</body>
+</html>
