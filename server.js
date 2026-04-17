@@ -13,13 +13,12 @@ const FEISHU = {
 };
 
 const LEADERS = [
-  { name: '赵总', role: '董事长', color: '#E4393C' },
-  { name: '刚总', role: '总经理', color: '#D48806' },
-  { name: '许书记', role: '党委副书记', color: '#1677FF' },
-  { name: '肖总', role: '副总经理', color: '#389E0D' },
-  { name: '孟总', role: '副总经理', color: '#722ED1' },
-  { name: 'X书记', role: '纪委书记', color: '#C41D7F' },
-  { name: '闫总', role: '副总经理', color: '#13A8A8' },
+  { name: '赵总', display: '赵', color: '#E4393C' },
+  { name: '刚总', display: '刚', color: '#D48806' },
+  { name: '许书记', display: '许', color: '#1677FF' },
+  { name: '肖总', display: '肖', color: '#389E0D' },
+  { name: '孟总', display: '孟', color: '#722ED1' },
+  { name: '别书记', display: '别', color: '#C41D7F' },
 ];
 
 let tokenCache = { token: '', expire: 0 };
@@ -84,7 +83,7 @@ app.get('/api/schedules', async (req, res) => {
     const schedules = all.map(rec => {
       const f = rec.fields;
       let dateStr = '';
-      if (f['日期']) { const d = new Date(f['日期']); dateStr = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+      if (f['日期']) { const d = new Date(f['日期']); dateStr = d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')+'-'+String(d.getUTCDate()).padStart(2,'0'); }
       const sm = parseTime(f['开始时间']), em = parseTime(f['结束时间']);
       return {
         id: rec.record_id, leader: f['领导姓名']||'', date: dateStr,
@@ -95,6 +94,7 @@ app.get('/api/schedules', async (req, res) => {
         notes: f['备注']||'', is_allday: f['开始时间']==='全天',
         companion: f['陪同人']||'', preparation: f['筹备内容']||'',
         accommodation: f['食宿安排']||'', vehicle: f['车辆安排']||'',
+        type: f['行程类型']||'',
       };
     }).filter(s => s.date && s.leader);
     schedules.sort((a,b) => a.date!==b.date ? a.date.localeCompare(b.date) : (a.start_min||0)-(b.start_min||0));
@@ -106,7 +106,7 @@ app.get('/api/schedules', async (req, res) => {
 app.post('/api/schedules', async (req, res) => {
   try {
     const s = req.body;
-    const dateTs = new Date(s.date + 'T00:00:00+08:00').getTime();
+    const dateTs = new Date(s.date + 'T16:00:00Z').getTime();
     const fields = {
       '事项': s.title, '领导姓名': s.leader, '日期': dateTs,
       '开始时间': s.start_time, '结束时间': s.end_time||'',
@@ -115,6 +115,7 @@ app.post('/api/schedules', async (req, res) => {
       '陪同人': s.companion||'', '筹备内容': s.preparation||'',
       '食宿安排': s.accommodation||'', '车辆安排': s.vehicle||'',
     };
+    if (s.type) fields['行程类型'] = s.type;
     const r = await feishuAPI('POST', `/bitable/v1/apps/${FEISHU.BASE_TOKEN}/tables/${FEISHU.TABLE_ID}/records`, { fields });
     if (r.code !== 0) return res.status(500).json({ error: r.msg });
     res.json({ success: true, id: r.data.record.record_id });
@@ -128,7 +129,7 @@ app.put('/api/schedules/:id', async (req, res) => {
     const fields = {};
     if (s.title) fields['事项'] = s.title;
     if (s.leader) fields['领导姓名'] = s.leader;
-    if (s.date) fields['日期'] = new Date(s.date + 'T00:00:00+08:00').getTime();
+    if (s.date) fields['日期'] = new Date(s.date + 'T16:00:00Z').getTime();
     if (s.start_time) fields['开始时间'] = s.start_time;
     if (s.end_time !== undefined) fields['结束时间'] = s.end_time;
     if (s.location !== undefined) fields['地点'] = s.location;
@@ -139,6 +140,7 @@ app.put('/api/schedules/:id', async (req, res) => {
     if (s.preparation !== undefined) fields['筹备内容'] = s.preparation;
     if (s.accommodation !== undefined) fields['食宿安排'] = s.accommodation;
     if (s.vehicle !== undefined) fields['车辆安排'] = s.vehicle;
+    if (s.type) fields['行程类型'] = s.type;
     const r = await feishuAPI('PUT', `/bitable/v1/apps/${FEISHU.BASE_TOKEN}/tables/${FEISHU.TABLE_ID}/records/${req.params.id}`, { fields });
     if (r.code !== 0) return res.status(500).json({ error: r.msg });
     res.json({ success: true });

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>西影集团 · 班子行程</title>
+<title>行程表</title>
 <style>
 :root{--red:#C41E2F;--red-dark:#9B1824;--bg:#F5F6FA;--card:#FFF;--text:#1A1A1A;--text2:#555;--text3:#999;--border:#EBEDF0;--green:#00B578;--orange:#FF8F1F;--blue:#1677FF;}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
@@ -13,6 +13,44 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans G
 .header{background:linear-gradient(135deg,var(--red),var(--red-dark));color:white;padding:16px 16px 12px;position:sticky;top:0;z-index:100;box-shadow:0 2px 16px rgba(196,30,47,0.3);}
 .header h1{font-size:17px;font-weight:600;text-align:center;letter-spacing:3px;}
 .header .sub{text-align:center;font-size:11px;opacity:0.6;margin-top:3px;}
+
+/* Leader Kanban */
+.kanban-wrap{background:white;border-bottom:1px solid var(--border);padding:12px 12px 14px;}
+.kanban-label{font-size:11px;font-weight:600;color:var(--text3);letter-spacing:1px;margin-bottom:10px;}
+.lk-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.lk-card{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 8px 12px;border-radius:12px;cursor:pointer;border:1.5px solid;transition:opacity 0.1s;}
+.lk-card:active{opacity:0.65;}
+.lk-char{font-size:28px;font-weight:800;line-height:1;}
+.lk-cnt{font-size:10px;margin-top:5px;font-weight:500;}
+
+/* Type Tags */
+.type-tag{display:inline-block;font-size:10px;padding:1px 7px;border-radius:4px;font-weight:600;vertical-align:middle;margin-left:3px;}
+.type-visit{background:#E6F4FF;color:#1677FF;}
+.type-out{background:#FFF7E6;color:#D48806;}
+
+/* Leader Screen */
+.leader-screen{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg);z-index:250;display:flex;flex-direction:column;transform:translateX(100%);transition:transform 0.28s cubic-bezier(0.4,0,0.2,1);}
+.leader-screen.show{transform:translateX(0);}
+.ls-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;color:white;}
+.ls-back{border:none;background:rgba(255,255,255,0.22);color:white;font-size:14px;padding:7px 16px;border-radius:20px;cursor:pointer;font-weight:500;}
+.ls-back:active{opacity:0.7;}
+.ls-title{font-size:24px;font-weight:800;letter-spacing:6px;}
+.ls-placeholder{width:70px;}
+.ls-stats{display:flex;gap:20px;padding:10px 16px;background:white;border-bottom:1px solid var(--border);font-size:12px;color:var(--text2);}
+.ls-stats strong{font-size:16px;margin-right:2px;}
+.ls-content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 12px 80px;}
+.ls-month{font-size:11px;font-weight:600;color:var(--text3);padding:14px 4px 6px;letter-spacing:1px;text-transform:uppercase;}
+.ls-date-group{background:white;border-radius:10px;margin-bottom:8px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.04);}
+.ls-date-header{font-size:12px;font-weight:600;color:var(--text2);padding:8px 12px;background:#FAFAFA;border-bottom:1px solid var(--border);}
+.ls-date-header.past{color:var(--text3);}
+.ls-date-header.is-today{color:var(--red);}
+.ls-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid #F5F5F5;cursor:pointer;}
+.ls-item:last-child{border-bottom:none;}
+.ls-item:active{background:#F5F6FA;}
+.ls-item-time{flex-shrink:0;width:44px;font-size:13px;font-weight:700;color:var(--red);text-align:center;}
+.ls-item-body{flex:1;min-width:0;}
+.ls-item-title{font-size:13px;font-weight:500;line-height:1.4;}
+.ls-item-meta{font-size:11px;color:var(--text3);margin-top:2px;}
 
 .date-nav{background:white;display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--border);position:relative;}
 .date-nav .btn{width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:white;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--text2);cursor:pointer;}
@@ -51,7 +89,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans G
 .tl-leader{display:flex;align-items:center;gap:8px;margin-bottom:8px;padding:0 4px;}
 .tl-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
 .tl-name{font-size:14px;font-weight:600;}
-.tl-role{font-size:11px;color:var(--text3);}
 .tl-cnt{font-size:11px;color:white;background:var(--red);border-radius:8px;padding:0 6px;margin-left:auto;}
 
 .time-bar{background:white;border-radius:10px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.04);margin-bottom:4px;cursor:pointer;transition:transform 0.1s;}
@@ -60,8 +97,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans G
 .time-slot{height:100%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:500;color:white;overflow:hidden;white-space:nowrap;}
 .time-slot.busy{background:var(--red);opacity:0.85;}
 .time-slot.free{background:var(--green);opacity:0.25;}
-.time-labels{display:flex;justify-content:space-between;padding:0 8px 6px;}
-.time-label{font-size:9px;color:var(--text3);}
+.time-labels{position:relative;height:16px;margin:0 8px 6px;}
+.time-label{position:absolute;font-size:9px;color:var(--text3);transform:translateX(-50%);}
 
 .sch-item{display:flex;padding:10px 12px;border-bottom:1px solid #F5F5F5;gap:10px;align-items:flex-start;cursor:pointer;}
 .sch-item:last-child{border-bottom:none;}
@@ -79,6 +116,38 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans G
 .empty .msg{font-size:13px;}
 
 .footer{text-align:center;font-size:10px;color:#CCC;padding:16px;}
+
+/* Toast */
+.toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,180,90,0.9);color:white;padding:12px 28px;border-radius:10px;font-size:14px;font-weight:500;z-index:9999;pointer-events:none;animation:toastIn 0.3s ease,toastOut 0.3s ease 1.2s forwards;}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,-50%) scale(0.8);}to{opacity:1;transform:translate(-50%,-50%) scale(1);}}
+@keyframes toastOut{from{opacity:1;}to{opacity:0;}}
+
+/* Password Lock */
+.lock-screen{position:fixed;top:0;left:0;right:0;bottom:0;background:linear-gradient(135deg,var(--red),var(--red-dark));z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;color:white;}
+.lock-title{font-size:20px;font-weight:600;letter-spacing:4px;margin-bottom:6px;}
+.lock-sub{font-size:12px;opacity:0.6;margin-bottom:30px;}
+.lock-input{width:180px;padding:12px;border:2px solid rgba(255,255,255,0.3);border-radius:12px;background:rgba(255,255,255,0.1);color:white;font-size:20px;text-align:center;letter-spacing:8px;outline:none;}
+.lock-input::placeholder{color:rgba(255,255,255,0.3);letter-spacing:2px;font-size:14px;}
+.lock-input:focus{border-color:rgba(255,255,255,0.6);}
+.lock-btn{margin-top:16px;padding:10px 40px;border:none;border-radius:10px;background:white;color:var(--red);font-size:15px;font-weight:600;cursor:pointer;}
+.lock-btn:active{opacity:0.8;}
+.lock-err{font-size:12px;color:#FFD2D2;margin-top:10px;min-height:18px;}
+
+/* Dashboard */
+.dashboard{padding:12px;margin-bottom:0;}
+.dash-section{background:white;border-radius:12px;padding:14px;margin-bottom:10px;}
+.dash-title{font-size:15px;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.dash-date-group{margin-bottom:12px;}
+.dash-date-group:last-child{margin-bottom:0;}
+.dash-date{font-size:12px;color:var(--text3);font-weight:500;margin-bottom:6px;padding-left:2px;}
+.dash-item{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg);border-radius:8px;margin-bottom:4px;cursor:pointer;}
+.dash-item:last-child{margin-bottom:0;}
+.dash-item:active{opacity:0.7;}
+.dash-leader-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.dash-time{font-size:12px;color:var(--red);font-weight:600;flex-shrink:0;width:42px;}
+.dash-info{flex:1;min-width:0;}
+.dash-info-title{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.dash-info-leader{font-size:11px;color:var(--text3);}
 
 /* FAB */
 .fab{position:fixed;right:16px;bottom:24px;width:52px;height:52px;border-radius:50%;background:var(--red);color:white;border:none;font-size:28px;box-shadow:0 4px 16px rgba(196,30,47,0.4);cursor:pointer;z-index:200;display:flex;align-items:center;justify-content:center;}
@@ -117,9 +186,24 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans G
 </head>
 <body>
 
+<!-- Password Lock Screen -->
+<div class="lock-screen" id="lockScreen">
+  <div class="lock-title">行程表</div>
+  <div class="lock-sub">请输入访问密码</div>
+  <input type="password" class="lock-input" id="lockPwd" placeholder="密码" maxlength="10" inputmode="numeric">
+  <button class="lock-btn" onclick="unlock()">进入</button>
+  <div class="lock-err" id="lockErr"></div>
+</div>
+
+<div id="mainApp" style="display:none;">
 <div class="header">
-  <h1>西影集团 · 班子行程</h1>
-  <div class="sub" id="syncTime">数据同步自飞书</div>
+  <div class="sub" id="syncTime">实时同步</div>
+</div>
+
+<!-- 领导行程看板 -->
+<div class="kanban-wrap">
+  <div class="kanban-label">领导行程看板</div>
+  <div class="lk-grid" id="leaderKanban"></div>
 </div>
 
 <div class="date-nav">
@@ -130,6 +214,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans G
 </div>
 
 <div class="week-strip" id="ws"></div>
+<div id="dashWrap"></div>
 <div class="summary" id="sum"></div>
 <div class="mode-tabs">
   <div class="mode-tab active" id="mt0" onclick="setMode('all')">按时间</div>
@@ -137,9 +222,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans G
 </div>
 <div id="fb"></div>
 <div id="ct"><div style="text-align:center;padding:40px;color:#999;">加载中...</div></div>
-<div class="footer">数据来源：飞书多维表格 · 自动同步</div>
+<div class="footer">数据自动同步</div>
 
 <button class="fab" onclick="openCreate()">＋</button>
+</div><!-- end mainApp -->
+
+<!-- Leader Screen -->
+<div class="leader-screen" id="leaderScreen">
+  <div class="ls-header" id="lsHeader">
+    <button class="ls-back" onclick="closeLeaderScreen()">‹ 返回</button>
+    <div class="ls-title" id="lsName"></div>
+    <div class="ls-placeholder"></div>
+  </div>
+  <div class="ls-stats" id="lsStats"></div>
+  <div class="ls-content" id="lsContent"></div>
+</div>
 
 <!-- Detail Modal -->
 <div class="modal-mask" id="detailModal">
@@ -152,9 +249,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans G
 <!-- Create Modal -->
 <div class="modal-mask" id="createModal">
   <div class="modal">
-    <div class="modal-header"><div class="modal-title">新增行程</div><div class="modal-close" onclick="closeCreate()">✕</div></div>
+    <div class="modal-header"><div class="modal-title" id="createModalTitle">新增行程</div><div class="modal-close" onclick="closeCreate()">✕</div></div>
     <div class="modal-body">
       <form id="createForm" onsubmit="submitCreate(event)">
+        <div class="form-group">
+          <label class="form-label">行程类型</label>
+          <select class="form-select" id="f_type">
+            <option value="">请选择（可不填）</option>
+            <option value="来访">来访（外部人员来访，我方接待）</option>
+            <option value="出访">出访（领导外出，出差 / 参会 / 培训）</option>
+          </select>
+        </div>
         <div class="form-row">
           <div class="form-group"><label class="form-label"><span class="req">*</span> 领导</label><select class="form-select" id="f_leader" required></select></div>
           <div class="form-group"><label class="form-label"><span class="req">*</span> 日期</label><input type="date" class="form-input" id="f_date" required></div>
@@ -164,12 +269,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans G
           <div class="form-group"><label class="form-label">结束</label><input type="time" class="form-input" id="f_end"></div>
         </div>
         <div class="form-group"><label class="form-label"><span class="req">*</span> 事项</label><input class="form-input" id="f_title" placeholder="行程标题" required></div>
-        <div class="form-group"><label class="form-label">地点</label><input class="form-input" id="f_location" placeholder="具体地点"></div>
         <div class="form-row">
-          <div class="form-group"><label class="form-label">参与人</label><input class="form-input" id="f_participants" placeholder="外部参会人"></div>
+          <div class="form-group"><label class="form-label">来访主要领导</label><input class="form-input" id="f_participants" placeholder="来访领导姓名/职务"></div>
           <div class="form-group"><label class="form-label">陪同人</label><input class="form-input" id="f_companion" placeholder="内部陪同人"></div>
         </div>
         <div class="form-group"><label class="form-label">筹备内容</label><textarea class="form-textarea" id="f_preparation" placeholder="需准备的资料、PPT、视频、物料等"></textarea></div>
+        <div class="form-group"><label class="form-label">地点</label><input class="form-input" id="f_location" placeholder="默认西影园区，出差请填写"></div>
         <div class="form-row">
           <div class="form-group"><label class="form-label">车辆安排</label><select class="form-select" id="f_vehicle"><option value="">请选择</option><option>需要用车</option><option>自驾</option><option>无需用车</option><option>待确认</option></select></div>
           <div class="form-group"><label class="form-label">食宿安排</label><input class="form-input" id="f_accommodation" placeholder="酒店/餐厅等"></div>
@@ -185,13 +290,33 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans G
 </div>
 
 <script>
-const WD=['日','一','二','三','四','五','六'], WS=8*60+30, WE=18*60;
+const WD=['日','一','二','三','四','五','六'], WS=8*60+30, WE=22*60;
+const ACCESS_PWD='2016';
 let L=[],D=[],cd=new Date(),cm='all',cl='all';
+let currentLeader=null;
+
+// ---- Password ----
+function checkAuth(){
+  if(localStorage.getItem('xc_auth')==='1'){showApp();return;}
+  document.getElementById('lockScreen').style.display='flex';
+  document.getElementById('lockPwd').focus();
+  document.getElementById('lockPwd').addEventListener('keydown',e=>{if(e.key==='Enter')unlock();});
+}
+function unlock(){
+  const v=document.getElementById('lockPwd').value;
+  if(v===ACCESS_PWD){localStorage.setItem('xc_auth','1');showApp();}
+  else{document.getElementById('lockErr').textContent='密码错误，请重试';document.getElementById('lockPwd').value='';document.getElementById('lockPwd').focus();}
+}
+function showApp(){
+  document.getElementById('lockScreen').style.display='none';
+  document.getElementById('mainApp').style.display='block';
+  init();
+}
 
 async function init(){
   try{L=await(await fetch('/api/leaders')).json();}catch(e){}
   const sel=document.getElementById('f_leader');
-  sel.innerHTML=L.map(l=>`<option>${l.name}</option>`).join('');
+  sel.innerHTML=L.map(l=>`<option value="${l.name}">${l.display}</option>`).join('');
   setDate(new Date());
 }
 
@@ -225,24 +350,34 @@ async function load(){
     const s=document.getElementById('ws'),days=s.querySelectorAll('.day'),d=new Date(cd),dw=d.getDay()||7,m=new Date(d);m.setDate(d.getDate()-dw+1);
     days.forEach((el,i)=>{const dy=new Date(m);dy.setDate(m.getDate()+i);if(D.some(x=>x.date===fmt(dy))&&!el.querySelector('.dot')){const dot=document.createElement('div');dot.className='dot';el.appendChild(dot);}});
     render();
+    renderDash();
+    renderLeaderKanban();
   }catch(e){document.getElementById('ct').innerHTML='<div class="empty"><div class="icon">⚠️</div><div class="msg">加载失败</div></div>';}
 }
 
 function setMode(m){cm=m;document.getElementById('mt0').className='mode-tab'+(m==='all'?' active':'');document.getElementById('mt1').className='mode-tab'+(m==='leader'?' active':'');render();}
 
+// ---- Type Tag Helper ----
+function typeTag(type){
+  if(type==='来访')return '<span class="type-tag type-visit">来访</span>';
+  if(type==='出访')return '<span class="type-tag type-out">出访</span>';
+  return '';
+}
+
 function render(){
   const ds=fmt(cd);let items=D.filter(s=>s.date===ds);
-  document.getElementById('sum').innerHTML=`<div><strong>${items.length}</strong>条行程</div><div><strong>${new Set(items.map(s=>s.leader)).size}</strong>位领导</div><div><strong>${items.filter(s=>s.importance==='高').length}</strong>条重要</div>`;
+  document.getElementById('sum').innerHTML=`<div><strong>${items.length}</strong>条行程</div><div><strong>${new Set(items.map(s=>s.leader)).size}</strong>位领导</div>`;
   if(!items.length){document.getElementById('fb').innerHTML='';document.getElementById('ct').innerHTML='<div class="empty"><div class="icon">📭</div><div class="msg">当日暂无行程安排</div></div>';return;}
   cm==='all'?rAll(items):rLdr(items);
 }
 
 function schCard(s,showLeader){
   const l=L.find(x=>x.name===s.leader);const c=l?l.color:'#999';
+  const tt=typeTag(s.type);
   return `<div class="sch-item" onclick="openDetail('${s.id}')">
     <div class="sch-time">${s.is_allday?'<span class="allday-tag">全天</span>':`<div class="t1">${s.start_time}</div><div class="t2">${s.end_time||''}</div>`}</div>
-    <div class="sch-body"><div class="sch-title">${s.title}</div>
-      <div class="sch-meta">${showLeader?`<span style="background:${c}15;color:${c};padding:1px 8px;border-radius:10px;font-size:11px;font-weight:500;">${s.leader}</span> `:''}${s.location?'📍'+s.location:''}</div>
+    <div class="sch-body"><div class="sch-title">${s.title}${tt?' '+tt:''}</div>
+      <div class="sch-meta">${showLeader?`<span style="background:${c}15;color:${c};padding:1px 8px;border-radius:10px;font-size:11px;font-weight:500;">${l?l.display:s.leader}</span> `:''}${s.location?'📍'+s.location:''}</div>
       ${s.preparation?`<div class="sch-meta" style="color:var(--orange);">📋 ${s.preparation.length>20?s.preparation.slice(0,20)+'…':s.preparation}</div>`:''}
     </div><div class="sch-arrow">›</div></div>`;
 }
@@ -250,7 +385,7 @@ function schCard(s,showLeader){
 function rAll(items){
   const p=[...new Set(items.map(s=>s.leader))];
   const bar=document.getElementById('fb');bar.className='leader-filter';
-  bar.innerHTML=`<div class="lf-chip ${cl==='all'?'active':''}" onclick="setLF('all')">全部</div>`+p.map(n=>{const l=L.find(x=>x.name===n);const c=l?l.color:'#999';return `<div class="lf-chip ${cl===n?'active':''}" onclick="setLF('${n}')" ${cl===n?'':`style="border-color:${c};color:${c}"`}>${n}</div>`;}).join('');
+  bar.innerHTML=`<div class="lf-chip ${cl==='all'?'active':''}" onclick="setLF('all')">全部</div>`+p.map(n=>{const l=L.find(x=>x.name===n);const c=l?l.color:'#999';return `<div class="lf-chip ${cl===n?'active':''}" onclick="setLF('${n}')" ${cl===n?'':`style="border-color:${c};color:${c}"`}>${l?l.display:n}</div>`;}).join('');
   let f=cl==='all'?items:items.filter(s=>s.leader===cl);
   document.getElementById('ct').innerHTML='<div class="timeline">'+f.map(s=>('<div class="time-bar">'+schCard(s,true)+'</div>')).join('')+'</div>';
 }
@@ -261,25 +396,159 @@ function rLdr(items){
   let h='<div class="timeline">';
   for(const[name,scheds]of Object.entries(groups)){
     const l=L.find(x=>x.name===name);const c=l?l.color:'#999';
-    h+=`<div class="tl-group"><div class="tl-leader"><div class="tl-dot" style="background:${c}"></div><div class="tl-name">${name}</div><div class="tl-role">${l?l.role:''}</div><div class="tl-cnt">${scheds.length}</div></div>`;
+    h+=`<div class="tl-group"><div class="tl-leader"><div class="tl-dot" style="background:${c}"></div><div class="tl-name">${l?l.display:name}</div><div class="tl-cnt">${scheds.length}</div></div>`;
     const busy=scheds.filter(s=>!s.is_allday&&s.start_min!=null).sort((a,b)=>a.start_min-b.start_min);
     const hasAll=scheds.some(s=>s.is_allday);
     if(hasAll){
-      h+=`<div class="time-bar" style="cursor:default;"><div style="padding:6px 8px;"><div class="time-slots"><div class="time-slot busy" style="flex:1;font-size:10px;">全天忙碌</div></div><div class="time-labels"><div class="time-label">08:30</div><div class="time-label">12:00</div><div class="time-label">18:00</div></div></div></div>`;
+      h+=`<div class="time-bar" style="cursor:default;"><div style="padding:6px 8px;"><div class="time-slots"><div class="time-slot busy" style="flex:1;font-size:10px;">全天忙碌</div></div>${tLabels()}</div></div>`;
     }else if(busy.length){
       let segs=[],cur=WS;busy.forEach(s=>{if(s.start_min>cur)segs.push({t:'free',s:cur,e:s.start_min});segs.push({t:'busy',s:Math.max(cur,s.start_min),e:s.end_min,title:s.title});cur=Math.max(cur,s.end_min);});if(cur<WE)segs.push({t:'free',s:cur,e:WE});
       const tot=WE-WS;h+=`<div class="time-bar" style="cursor:default;"><div style="padding:6px 8px;"><div class="time-slots">`;
       segs.forEach(seg=>{const pct=((seg.e-seg.s)/tot*100).toFixed(1);const lb=seg.t==='busy'?(seg.title.length>6?seg.title.slice(0,6)+'…':seg.title):'空闲';h+=`<div class="time-slot ${seg.t}" style="flex:${pct}">${pct>8?lb:''}</div>`;});
-      h+=`</div><div class="time-labels"><div class="time-label">08:30</div><div class="time-label">12:00</div><div class="time-label">18:00</div></div></div></div>`;
+      h+=`</div>${tLabels()}</div></div>`;
     }
     h+='<div class="time-bar">'+scheds.map(s=>schCard(s,false)).join('')+'</div></div>';
   }
   const free=L.filter(l=>!groups[l.name]);
-  if(free.length){h+='<div style="margin-top:12px;padding:12px;background:white;border-radius:10px;"><div style="font-size:12px;color:var(--text3);margin-bottom:8px;">🟢 以下领导当日暂无行程</div><div style="display:flex;flex-wrap:wrap;gap:8px;">'+free.map(l=>`<span style="font-size:12px;padding:3px 10px;border-radius:12px;background:${l.color}10;color:${l.color};font-weight:500;">${l.name}</span>`).join('')+'</div></div>';}
+  if(free.length){h+='<div style="margin-top:12px;padding:12px;background:white;border-radius:10px;"><div style="font-size:12px;color:var(--text3);margin-bottom:8px;">🟢 以下领导当日暂无行程</div><div style="display:flex;flex-wrap:wrap;gap:8px;">'+free.map(l=>`<span style="font-size:12px;padding:3px 10px;border-radius:12px;background:${l.color}10;color:${l.color};font-weight:500;">${l.display}</span>`).join('')+'</div></div>';}
   h+='</div>';document.getElementById('ct').innerHTML=h;
 }
 
 function setLF(n){cl=n;render();}
+
+function showToast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),1600);}
+
+// ---- Time Labels ----
+function tLabels(){
+  const marks=[WS,12*60,14*60,16*60,18*60,20*60,WE];
+  const tot=WE-WS;
+  return '<div class="time-labels">'+marks.map(m=>{
+    const pct=((m-WS)/tot*100).toFixed(1);
+    const h=Math.floor(m/60),mn=m%60;
+    const lb=String(h).padStart(2,'0')+':'+String(mn).padStart(2,'0');
+    return `<div class="time-label" style="left:${pct}%">${lb}</div>`;
+  }).join('')+'</div>';
+}
+
+// ---- Dashboard: 近30天概览 ----
+function renderDash(){
+  const today=new Date();today.setHours(0,0,0,0);
+  const upcoming=[];
+  for(let i=0;i<30;i++){
+    const d=new Date(today);d.setDate(today.getDate()+i);
+    const ds=fmt(d);
+    const dayItems=D.filter(s=>s.date===ds).sort((a,b)=>(a.start_time||'').localeCompare(b.start_time||''));
+    if(dayItems.length)upcoming.push({date:d,ds,items:dayItems});
+  }
+  const wrap=document.getElementById('dashWrap');
+  if(!upcoming.length){wrap.innerHTML='';return;}
+  let h='<div class="dashboard"><div class="dash-section"><div class="dash-title">📋 近30日行程概览</div>';
+  upcoming.forEach(g=>{
+    const diff=Math.round((g.date-today)/864e5);
+    let label=`${g.date.getMonth()+1}月${g.date.getDate()}日 星期${WD[g.date.getDay()]}`;
+    if(diff===0)label+=' (今天)';else if(diff===1)label+=' (明天)';else if(diff===2)label+=' (后天)';
+    h+=`<div class="dash-date-group"><div class="dash-date">${label} · ${g.items.length}条</div>`;
+    g.items.forEach(s=>{
+      const l=L.find(x=>x.name===s.leader);const c=l?l.color:'#999';
+      const tm=s.is_allday?'全天':s.start_time||'--';
+      const tt=typeTag(s.type);
+      h+=`<div class="dash-item" onclick="goDateAndDetail('${g.ds}','${s.id}')"><div class="dash-leader-dot" style="background:${c}"></div><div class="dash-time">${tm}</div><div class="dash-info"><div class="dash-info-title">${s.title}${tt?' '+tt:''}</div><div class="dash-info-leader">${l?l.display:s.leader}${s.location?' · '+s.location:''}</div></div></div>`;
+    });
+    h+='</div>';
+  });
+  h+='</div></div>';
+  wrap.innerHTML=h;
+}
+
+function goDateAndDetail(ds,id){
+  const d=new Date(ds+'T00:00:00');setDate(d);
+  if(id)setTimeout(()=>openDetail(id),300);
+}
+
+// ---- Leader Kanban ----
+function renderLeaderKanban(){
+  const today=fmt(new Date());
+  document.getElementById('leaderKanban').innerHTML=L.map(l=>{
+    const upcoming=D.filter(s=>s.leader===l.name&&s.date>=today).length;
+    return `<div class="lk-card" onclick="openLeaderScreen('${l.name}')"
+      style="border-color:${l.color}35;background:${l.color}08;">
+      <div class="lk-char" style="color:${l.color};">${l.display}</div>
+      <div class="lk-cnt" style="color:${l.color};">${upcoming?upcoming+'条待办':'暂无安排'}</div>
+    </div>`;
+  }).join('');
+}
+
+// ---- Leader Screen ----
+function openLeaderScreen(leaderName){
+  const l=L.find(x=>x.name===leaderName);
+  if(!l)return;
+  currentLeader=leaderName;
+  const hdr=document.getElementById('lsHeader');
+  hdr.style.background=`linear-gradient(135deg,${l.color},${l.color}cc)`;
+  document.getElementById('lsName').textContent=l.display;
+  renderLeaderSchedule(leaderName);
+  document.getElementById('leaderScreen').classList.add('show');
+}
+
+function closeLeaderScreen(){
+  document.getElementById('leaderScreen').classList.remove('show');
+  currentLeader=null;
+}
+
+function renderLeaderSchedule(name){
+  const all=D.filter(s=>s.leader===name).sort((a,b)=>
+    a.date!==b.date?a.date.localeCompare(b.date):(a.start_min||0)-(b.start_min||0));
+  const today=fmt(new Date());
+  const upcoming=all.filter(s=>s.date>=today).length;
+
+  document.getElementById('lsStats').innerHTML=
+    `<div>共 <strong style="color:var(--red)">${all.length}</strong> 条行程</div>`+
+    `<div>未来待办 <strong style="color:var(--red)">${upcoming}</strong> 条</div>`;
+
+  if(!all.length){
+    document.getElementById('lsContent').innerHTML='<div class="empty"><div class="icon">📭</div><div class="msg">暂无行程记录</div></div>';
+    return;
+  }
+
+  // 按月分组
+  const byMonth={};
+  all.forEach(s=>{
+    const mk=s.date.slice(0,7);
+    if(!byMonth[mk])byMonth[mk]={};
+    if(!byMonth[mk][s.date])byMonth[mk][s.date]=[];
+    byMonth[mk][s.date].push(s);
+  });
+
+  let h='';
+  for(const[mk,dates]of Object.entries(byMonth)){
+    const[y,mo]=mk.split('-');
+    h+=`<div class="ls-month">${y}年 ${parseInt(mo)}月</div>`;
+    for(const[date,items]of Object.entries(dates)){
+      const dobj=new Date(date+'T00:00:00');
+      const isToday=date===today;
+      const isPast=date<today;
+      const dayLabel=`${parseInt(date.slice(5,7))}月${parseInt(date.slice(8,10))}日 星期${WD[dobj.getDay()]}`;
+      h+=`<div class="ls-date-group">
+        <div class="ls-date-header ${isPast&&!isToday?'past':''} ${isToday?'is-today':''}">
+          ${dayLabel}${isToday?' <span class="tag tag-t">今天</span>':''}
+        </div>`;
+      items.forEach(s=>{
+        const tt=typeTag(s.type);
+        h+=`<div class="ls-item" onclick="openDetail('${s.id}')">
+          <div class="ls-item-time">${s.is_allday?'全天':(s.start_time||'--')}</div>
+          <div class="ls-item-body">
+            <div class="ls-item-title">${s.title}${tt?' '+tt:''}</div>
+            ${s.location?`<div class="ls-item-meta">📍 ${s.location}</div>`:''}
+          </div>
+          <div class="sch-arrow">›</div>
+        </div>`;
+      });
+      h+='</div>';
+    }
+  }
+  document.getElementById('lsContent').innerHTML=h;
+  document.getElementById('lsContent').scrollTop=0;
+}
 
 // ---- Detail Modal ----
 function openDetail(id){
@@ -292,34 +561,74 @@ function openDetail(id){
     if(isTag)return `<div class="detail-row"><div class="detail-label">${label}</div><div class="detail-value"><span class="detail-tag" style="background:${c}15;color:${c};">${val}</span></div></div>`;
     return `<div class="detail-row"><div class="detail-label">${label}</div><div class="detail-value">${val}</div></div>`;
   };
-  h+=row('领导',s.leader,true);
+  h+=row('领导',l?l.display:s.leader,true);
+  if(s.type){h+=`<div class="detail-row"><div class="detail-label">行程类型</div><div class="detail-value">${typeTag(s.type)}</div></div>`;}
   h+=row('时间',s.is_allday?'全天':`${s.start_time}${s.end_time?' — '+s.end_time:''}`);
-  h+=row('日期',s.date+' 星期'+WD[new Date(s.date).getDay()]);
+  h+=row('日期',s.date+' 星期'+WD[new Date(s.date+'T00:00:00').getDay()]);
+  h+=row('来访领导',s.participants);
   h+=row('地点',s.location);
-  h+=row('参与人',s.participants);
   h+=row('陪同人',s.companion);
   h+=row('筹备内容',s.preparation);
   h+=row('车辆安排',s.vehicle);
   h+=row('食宿安排',s.accommodation);
   h+=row('重要程度',s.importance);
   h+=row('备注',s.notes);
+  h+=`<div style="margin-top:20px;display:flex;gap:12px;justify-content:center;">
+    <button onclick="openEdit('${s.id}')" style="background:var(--blue);color:#fff;border:none;padding:10px 32px;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;flex:1;max-width:160px;">编辑修改</button>
+    <button onclick="delSchedule('${s.id}')" style="background:#ff4d4f;color:#fff;border:none;padding:10px 32px;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;flex:1;max-width:160px;">删除行程</button>
+  </div>`;
   document.getElementById('detailBody').innerHTML=h;
   document.getElementById('detailModal').classList.add('show');
 }
+async function delSchedule(id){
+  if(!confirm('确定要删除这条行程吗？'))return;
+  try{const r=await fetch('/api/schedules/'+id,{method:'DELETE'});const d=await r.json();if(d.success){closeDetail();load();}else{alert('删除失败');}}catch(e){alert('网络错误');}
+}
 function closeDetail(){document.getElementById('detailModal').classList.remove('show');}
 
-// ---- Create Modal ----
+// ---- Create / Edit Modal ----
+let editId=null;
+
 function openCreate(){
+  editId=null;
+  document.getElementById('createModalTitle').textContent='新增行程';
+  document.getElementById('f_submit').textContent='提交录入';
+  document.getElementById('createForm').reset();
   document.getElementById('f_date').value=fmt(cd);
   document.getElementById('createModal').classList.add('show');
 }
-function closeCreate(){document.getElementById('createModal').classList.remove('show');}
+
+function openEdit(id){
+  const s=D.find(x=>x.id===id);if(!s)return;
+  editId=id;
+  closeDetail();
+  document.getElementById('createModalTitle').textContent='编辑行程';
+  document.getElementById('f_submit').textContent='保存修改';
+  document.getElementById('f_type').value=s.type||'';
+  document.getElementById('f_leader').value=s.leader;
+  document.getElementById('f_date').value=s.date;
+  document.getElementById('f_start').value=s.start_time||'';
+  document.getElementById('f_end').value=s.end_time||'';
+  document.getElementById('f_title').value=s.title||'';
+  document.getElementById('f_location').value=s.location||'';
+  document.getElementById('f_participants').value=s.participants||'';
+  document.getElementById('f_companion').value=s.companion||'';
+  document.getElementById('f_preparation').value=s.preparation||'';
+  document.getElementById('f_vehicle').value=s.vehicle||'';
+  document.getElementById('f_accommodation').value=s.accommodation||'';
+  document.getElementById('f_importance').value=s.importance||'中';
+  document.getElementById('f_notes').value=s.notes||'';
+  document.getElementById('createModal').classList.add('show');
+}
+
+function closeCreate(){document.getElementById('createModal').classList.remove('show');editId=null;}
 
 async function submitCreate(e){
   e.preventDefault();
-  const btn=document.getElementById('f_submit');btn.disabled=true;btn.textContent='提交中...';
+  const btn=document.getElementById('f_submit');btn.disabled=true;btn.textContent=editId?'保存中...':'提交中...';
   try{
     const body={
+      type:document.getElementById('f_type').value,
       leader:document.getElementById('f_leader').value,
       date:document.getElementById('f_date').value,
       start_time:document.getElementById('f_start').value,
@@ -334,12 +643,33 @@ async function submitCreate(e){
       importance:document.getElementById('f_importance').value,
       notes:document.getElementById('f_notes').value,
     };
-    const r=await fetch('/api/schedules',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    let r;
+    if(editId){
+      r=await fetch('/api/schedules/'+editId,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    }else{
+      r=await fetch('/api/schedules',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    }
     const d=await r.json();
-    if(d.success){closeCreate();document.getElementById('createForm').reset();load();}
-    else{alert('提交失败: '+(d.error||'未知错误'));}
-  }catch(err){alert('网络错误');}
-  btn.disabled=false;btn.textContent='提交录入';
+    if(d.success){
+      const wasEdit=!!editId;
+      const newDate=document.getElementById('f_date').value;
+      closeCreate();document.getElementById('createForm').reset();
+      if(wasEdit){
+        showToast('修改成功');
+        setTimeout(()=>{
+          const nd=new Date(newDate+'T00:00:00');
+          cd=new Date(nd.getFullYear(),nd.getMonth(),nd.getDate());
+          updNav();updWS();load();
+          if(currentLeader)setTimeout(()=>renderLeaderSchedule(currentLeader),600);
+        },800);
+      }else{
+        showToast('添加成功');
+        setTimeout(()=>load(),500);
+      }
+    }
+    else{alert((editId?'修改':'提交')+'失败: '+(d.error||'未知错误'));}
+  }catch(err){alert('网络错误: '+err.message);}
+  btn.disabled=false;btn.textContent=editId?'保存修改':'提交录入';
 }
 
 // Close modal on mask click
@@ -349,7 +679,7 @@ let ty=0;
 document.addEventListener('touchstart',e=>{ty=e.touches[0].clientY;});
 document.addEventListener('touchend',e=>{if(e.changedTouches[0].clientY-ty>80&&window.scrollY===0)load();});
 setInterval(load,60000);
-init();
+checkAuth();
 </script>
 </body>
 </html>
