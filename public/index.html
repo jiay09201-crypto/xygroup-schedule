@@ -45,12 +45,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans G
 .ls-content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 12px 80px;}
 .ls-month{font-size:11px;font-weight:600;color:var(--text3);padding:14px 4px 6px;letter-spacing:1px;text-transform:uppercase;}
 .ls-date-group{background:white;border-radius:10px;margin-bottom:8px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.04);}
-.ls-date-header{font-size:12px;font-weight:600;color:var(--text2);padding:8px 12px;background:#FAFAFA;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+.ls-date-header{font-size:12px;font-weight:600;color:var(--text2);padding:8px 12px;background:#FAFAFA;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:10px;}
 .ls-date-header.past{color:var(--text3);}
 .ls-date-header.is-today{color:var(--red);}
-.ls-mini-bar{flex:1;height:8px;border-radius:4px;overflow:hidden;display:flex;background:#EFEFEF;min-width:60px;}
-.ls-mini-seg.busy{background:var(--red);opacity:0.8;}
+.ls-mini-wrap{flex:1;min-width:80px;display:flex;flex-direction:column;gap:2px;}
+.ls-mini-bar{height:8px;border-radius:4px;overflow:hidden;display:flex;background:#EFEFEF;}
+.ls-mini-seg.busy{background:var(--red);opacity:0.82;}
 .ls-mini-seg.free{background:#C8EDBE;}
+.ls-mini-labels{position:relative;height:13px;}
+.ls-mini-lbl{position:absolute;font-size:9px;color:var(--red);font-weight:600;white-space:nowrap;top:0;line-height:1;}
 .ls-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid #F5F5F5;cursor:pointer;}
 .ls-item:last-child{border-bottom:none;}
 .ls-item:active{background:#F5F6FA;}
@@ -559,17 +562,29 @@ function closeLeaderScreen(){
 function miniBar(items){
   const tot=WE-WS;
   const busy=items.filter(s=>!s.is_allday&&s.start_min!=null).sort((a,b)=>a.start_min-b.start_min);
-  if(items.some(s=>s.is_allday))return '<div class="ls-mini-bar"><div class="ls-mini-seg busy" style="flex:1" title="全天忙碌"></div></div>';
-  if(!busy.length)return '<div class="ls-mini-bar"><div class="ls-mini-seg free" style="flex:1"></div></div>';
-  let segs=[],cur=WS;
+  if(items.some(s=>s.is_allday)){
+    return '<div class="ls-mini-wrap"><div class="ls-mini-bar"><div class="ls-mini-seg busy" style="flex:1"></div></div><div class="ls-mini-labels"><div class="ls-mini-lbl" style="left:50%;transform:translateX(-50%)">全天</div></div></div>';
+  }
+  if(!busy.length)return '<div class="ls-mini-wrap"><div class="ls-mini-bar"><div class="ls-mini-seg free" style="flex:1"></div></div></div>';
+  let segs=[],cur=WS,labels=[];
   busy.forEach(s=>{
-    const st=Math.max(WS,s.start_min);const en=Math.min(WE,s.end_min||s.start_min+60);
+    const st=Math.max(WS,s.start_min);
+    const en=Math.min(WE,s.end_min||s.start_min+60);
     if(st>cur)segs.push({t:'free',v:st-cur});
-    if(en>cur)segs.push({t:'busy',v:Math.min(en,WE)-Math.max(st,cur),label:s.start_time});
+    const bv=Math.min(en,WE)-Math.max(st,cur);
+    if(bv>0){
+      segs.push({t:'busy',v:bv});
+      const stPct=((Math.max(st,WS)-WS)/tot*100).toFixed(1);
+      const enPct=((Math.min(en,WE)-WS)/tot*100).toFixed(1);
+      if(s.start_time)labels.push({pct:stPct,txt:s.start_time,side:'l'});
+      if(s.end_time)labels.push({pct:enPct,txt:s.end_time,side:'r'});
+    }
     cur=Math.max(cur,en);
   });
   if(cur<WE)segs.push({t:'free',v:WE-cur});
-  return '<div class="ls-mini-bar">'+segs.map(g=>`<div class="ls-mini-seg ${g.t}" style="flex:${(g.v/tot*100).toFixed(1)}" title="${g.label||''}"></div>`).join('')+'</div>';
+  const bar=segs.map(g=>`<div class="ls-mini-seg ${g.t}" style="flex:${(g.v/tot*100).toFixed(1)}"></div>`).join('');
+  const lbls=labels.map(l=>`<div class="ls-mini-lbl" style="left:${l.pct}%;transform:translateX(${l.side==='r'?'-100%':'0'})">${l.txt}</div>`).join('');
+  return `<div class="ls-mini-wrap"><div class="ls-mini-bar">${bar}</div><div class="ls-mini-labels">${lbls}</div></div>`;
 }
 
 function buildDateGroups(list,today){
