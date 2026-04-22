@@ -247,7 +247,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans G
 
 <div class="date-nav">
   <div class="btn" onclick="changeDate(-1)">◀</div>
-  <div class="center"><div class="dm" id="dm"></div><div class="ds" id="ds"></div></div>
+  <div class="center" onclick="openDatePicker()" style="cursor:pointer;position:relative;">
+    <div class="dm" id="dm"></div>
+    <div class="ds" id="ds"></div>
+    <input type="date" id="datePicker" style="position:absolute;opacity:0;width:100%;height:100%;top:0;left:0;cursor:pointer;" onchange="onDatePick(this.value)">
+  </div>
   <div class="today-btn" id="todayBtn" onclick="goToday()" style="display:none">回今天</div>
   <div class="btn" onclick="changeDate(1)">▶</div>
 </div>
@@ -375,6 +379,8 @@ async function init(){
 function setDate(d){cd=new Date(d.getFullYear(),d.getMonth(),d.getDate());updNav();updWS();load();}
 function changeDate(n){const d=new Date(cd);d.setDate(d.getDate()+n);setDate(d);}
 function goToday(){setDate(new Date());}
+function openDatePicker(){const p=document.getElementById('datePicker');p.value=fmt(cd);p.showPicker?p.showPicker():p.click();}
+function onDatePick(v){if(v){const d=new Date(v+'T00:00:00');setDate(d);}}
 function fmt(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 
 function updNav(){
