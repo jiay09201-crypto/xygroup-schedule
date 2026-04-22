@@ -48,6 +48,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans G
 .ls-date-header{font-size:12px;font-weight:600;color:var(--text2);padding:8px 12px;background:#FAFAFA;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:10px;}
 .ls-date-header.past{color:var(--text3);}
 .ls-date-header.is-today{color:var(--red);}
+/* Day overview bar (main timeline) */
+.day-bar-wrap{background:white;border-radius:10px;padding:10px 12px 6px;margin-bottom:6px;box-shadow:0 1px 4px rgba(0,0,0,0.04);}
+.day-bar-track{height:10px;border-radius:5px;overflow:hidden;display:flex;background:#EFEFEF;}
+.day-bar-lbls{position:relative;height:16px;margin-top:2px;}
+.day-bar-lbl{position:absolute;font-size:10px;font-weight:700;color:var(--red);white-space:nowrap;top:1px;}
 .ls-mini-wrap{flex:1;min-width:80px;display:flex;flex-direction:column;gap:2px;}
 .ls-mini-bar{height:8px;border-radius:4px;overflow:hidden;display:flex;background:#EFEFEF;}
 .ls-mini-seg.busy{background:var(--red);opacity:0.82;}
@@ -444,12 +449,41 @@ function schCard(s,showLeader){
     </div><div class="sch-arrow">›</div></div>`;
 }
 
+function dayBar(items){
+  const tot=WE-WS;
+  const timed=items.filter(s=>!s.is_allday&&s.start_min!=null).sort((a,b)=>a.start_min-b.start_min);
+  if(!timed.length&&!items.some(s=>s.is_allday))return '';
+  if(items.some(s=>s.is_allday)&&!timed.length){
+    const l=L.find(x=>x.name===items[0].leader);const c=l?l.color:'var(--red)';
+    return `<div class="day-bar-wrap"><div class="day-bar-track"><div style="flex:1;height:100%;background:${c};opacity:0.8;border-radius:5px;"></div></div><div class="day-bar-lbls"><div class="day-bar-lbl" style="left:50%;transform:translateX(-50%)">全天</div></div></div>`;
+  }
+  let segs=[],cur=WS,labels=[];
+  timed.forEach(s=>{
+    const l=L.find(x=>x.name===s.leader);const c=l?l.color:'var(--red)';
+    const st=Math.max(WS,s.start_min);const en=Math.min(WE,s.end_min||s.start_min+60);
+    if(st>cur)segs.push({t:'free',v:st-cur});
+    if(en>cur){
+      segs.push({t:'busy',v:Math.min(en,WE)-Math.max(st,cur),color:c});
+      const sp=((Math.max(st,WS)-WS)/tot*100).toFixed(1);
+      const ep=((Math.min(en,WE)-WS)/tot*100).toFixed(1);
+      if(s.start_time)labels.push({p:sp,txt:s.start_time,a:'l'});
+      if(s.end_time)labels.push({p:ep,txt:s.end_time,a:'r'});
+    }
+    cur=Math.max(cur,en);
+  });
+  if(cur<WE)segs.push({t:'free',v:WE-cur});
+  const bh=segs.map(g=>`<div style="flex:${(g.v/tot*100).toFixed(1)};height:100%;${g.t==='busy'?'background:'+g.color+';opacity:0.82':'background:#D6F0C8'}"></div>`).join('');
+  const lh=labels.map(l=>`<div class="day-bar-lbl" style="left:${l.p}%;transform:translateX(${l.a==='r'?'-100%':'0'})">${l.txt}</div>`).join('');
+  return `<div class="day-bar-wrap"><div class="day-bar-track">${bh}</div><div class="day-bar-lbls">${lh}</div></div>`;
+}
+
 function rAll(items){
   const p=[...new Set(items.map(s=>s.leader))];
   const bar=document.getElementById('fb');bar.className='leader-filter';
   bar.innerHTML=`<div class="lf-chip ${cl==='all'?'active':''}" onclick="setLF('all')">全部</div>`+p.map(n=>{const l=L.find(x=>x.name===n);const c=l?l.color:'#999';return `<div class="lf-chip ${cl===n?'active':''}" onclick="setLF('${n}')" ${cl===n?'':`style="border-color:${c};color:${c}"`}>${l?l.display:n}</div>`;}).join('');
   let f=cl==='all'?items:items.filter(s=>s.leader===cl);
-  document.getElementById('ct').innerHTML='<div class="timeline">'+f.map(s=>('<div class="time-bar">'+schCard(s,true)+'</div>')).join('')+'</div>';
+  const bar2=dayBar(f);
+  document.getElementById('ct').innerHTML='<div class="timeline">'+(bar2?bar2:'')+f.map(s=>('<div class="time-bar">'+schCard(s,true)+'</div>')).join('')+'</div>';
 }
 
 function rLdr(items){
