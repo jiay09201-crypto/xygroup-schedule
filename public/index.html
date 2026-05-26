@@ -31,6 +31,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans G
 .type-tag{display:inline-block;font-size:10px;padding:1px 7px;border-radius:4px;font-weight:600;vertical-align:middle;margin-left:3px;}
 .type-visit{background:#E6F4FF;color:#1677FF;}
 .type-out{background:#FFF7E6;color:#D48806;}
+.type-trip{background:#F6FFED;color:#389E0D;}
 
 /* Leader Screen */
 .leader-screen{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg);z-index:250;display:flex;flex-direction:column;transform:translateX(100%);transition:transform 0.28s cubic-bezier(0.4,0,0.2,1);}
@@ -90,7 +91,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans G
 .summary{display:flex;justify-content:center;gap:24px;padding:10px;font-size:12px;color:var(--text2);}
 .summary strong{color:var(--red);font-size:17px;margin-right:2px;}
 
-
 .leader-filter{display:flex;padding:10px 12px 0;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
 .leader-filter::-webkit-scrollbar{display:none;}
 .lf-chip{flex-shrink:0;padding:5px 12px;border-radius:16px;font-size:12px;border:1px solid var(--border);background:white;color:var(--text2);cursor:pointer;font-weight:500;}
@@ -122,6 +122,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans G
 .sch-meta{font-size:12px;color:var(--text2);margin-top:4px;line-height:1.6;}
 .sch-arrow{color:var(--text3);font-size:16px;align-self:center;flex-shrink:0;}
 .allday-tag{display:inline-block;font-size:11px;background:#FFF7E6;color:#D48806;padding:1px 8px;border-radius:4px;font-weight:500;}
+.trip-tag{display:inline-block;font-size:11px;background:#F6FFED;color:#389E0D;padding:1px 8px;border-radius:4px;font-weight:500;}
 
 .empty{text-align:center;padding:50px 20px;color:var(--text3);}
 .empty .icon{font-size:40px;margin-bottom:8px;}
@@ -194,6 +195,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans G
 .form-submit{width:100%;padding:12px;background:var(--red);color:white;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px;}
 .form-submit:active{opacity:0.8;}
 .form-submit:disabled{opacity:0.5;}
+
+/* Leader Picker */
+.leader-pick{display:flex;flex-wrap:wrap;gap:8px;padding:4px 0;}
+.lpick-btn{padding:6px 14px;border-radius:20px;border:1.5px solid #ddd;background:white;cursor:pointer;font-size:13px;font-weight:600;transition:background 0.15s,border-color 0.15s,color 0.15s;user-select:none;-webkit-user-select:none;}
 
 /* Search Screen */
 .search-screen{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg);z-index:260;display:flex;flex-direction:column;transform:translateY(-100%);transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);}
@@ -304,17 +309,28 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans G
       <form id="createForm" onsubmit="submitCreate(event)">
         <div class="form-group">
           <label class="form-label">行程类型</label>
-          <select class="form-select" id="f_type">
+          <select class="form-select" id="f_type" onchange="onTypeChange()">
             <option value="">请选择（可不填）</option>
             <option value="来访">来访（外部人员来访，我方接待）</option>
-            <option value="出访">出访（领导外出，出差 / 参会 / 培训）</option>
+            <option value="出访">出访（领导外出，参会/培训）</option>
+            <option value="出差">出差（多日出差，按日期范围）</option>
           </select>
         </div>
-        <div class="form-row">
-          <div class="form-group"><label class="form-label"><span class="req">*</span> 领导</label><select class="form-select" id="f_leader" required></select></div>
-          <div class="form-group"><label class="form-label"><span class="req">*</span> 日期</label><input type="date" class="form-input" id="f_date" required></div>
+        <div class="form-group">
+          <label class="form-label"><span class="req">*</span> 参与领导（可多选）</label>
+          <div class="leader-pick" id="f_leaders"></div>
         </div>
         <div class="form-row">
+          <div class="form-group">
+            <label class="form-label"><span class="req">*</span> <span id="date_label_text">日期</span></label>
+            <input type="date" class="form-input" id="f_date" required>
+          </div>
+          <div class="form-group" id="end_date_field" style="display:none">
+            <label class="form-label"><span class="req">*</span> 返回日期</label>
+            <input type="date" class="form-input" id="f_end_date">
+          </div>
+        </div>
+        <div id="time_fields" class="form-row">
           <div class="form-group"><label class="form-label"><span class="req">*</span> 开始</label><input type="time" class="form-input" id="f_start" required></div>
           <div class="form-group"><label class="form-label">结束</label><input type="time" class="form-input" id="f_end"></div>
         </div>
@@ -324,7 +340,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans G
           <div class="form-group"><label class="form-label">来访领导陪同人</label><input class="form-input" id="f_companion" placeholder="来访方陪同人员"></div>
         </div>
         <div class="form-group"><label class="form-label">调研行程安排</label><textarea class="form-textarea" id="f_preparation" placeholder="调研参观路线、座谈安排等"></textarea></div>
-        <div class="form-group"><label class="form-label">地点</label><input class="form-input" id="f_location" placeholder="默认西影园区，出差请填写"></div>
+        <div class="form-group"><label class="form-label">地点</label><input class="form-input" id="f_location" placeholder="默认西影园区，出差请填写目的地"></div>
         <div class="form-row">
           <div class="form-group"><label class="form-label">车辆安排</label><select class="form-select" id="f_vehicle"><option value="">请选择</option><option>需要用车</option><option>自驾</option><option>无需用车</option><option>待确认</option></select></div>
           <div class="form-group"><label class="form-label">食宿安排</label><input class="form-input" id="f_accommodation" placeholder="酒店/餐厅等"></div>
@@ -362,6 +378,14 @@ const ACCESS_PWD='2016';
 let L=[],D=[],cd=new Date(),cl='all';
 let currentLeader=null,showPast=false;
 
+// ---- Helpers ----
+function getLeaders(s){return (s.leaders&&s.leaders.length)?s.leaders:(s.leader?[s.leader]:[]);}
+
+function dateInRange(s,ds){
+  if(s.type==='出差'&&s.end_date){return s.date<=ds&&ds<=s.end_date;}
+  return s.date===ds;
+}
+
 // ---- Password ----
 function checkAuth(){
   if(localStorage.getItem('xc_auth')==='1'){showApp();return;}
@@ -382,9 +406,57 @@ function showApp(){
 
 async function init(){
   try{L=await(await fetch('/api/leaders')).json();}catch(e){}
-  const sel=document.getElementById('f_leader');
-  sel.innerHTML=L.map(l=>`<option value="${l.name}">${l.display}</option>`).join('');
+  initLeaderPicker();
   setDate(new Date());
+}
+
+// ---- Leader Picker (multi-select) ----
+function initLeaderPicker(){
+  const wrap=document.getElementById('f_leaders');
+  wrap.innerHTML=L.map(l=>`<div class="lpick-btn" data-name="${l.name}" data-color="${l.color}" style="color:${l.color};border-color:${l.color}33;background:${l.color}0D;" onclick="toggleLeaderPick(this)">${l.display}</div>`).join('');
+}
+
+function toggleLeaderPick(el){
+  const color=el.dataset.color;
+  if(el.classList.contains('on')){
+    el.classList.remove('on');
+    el.style.cssText=`color:${color};border-color:${color}33;background:${color}0D;`;
+  }else{
+    el.classList.add('on');
+    el.style.cssText=`color:white;border-color:${color};background:${color};`;
+  }
+}
+
+function getSelectedLeaders(){
+  return Array.from(document.querySelectorAll('#f_leaders .lpick-btn.on')).map(e=>e.dataset.name);
+}
+
+function setSelectedLeaders(names){
+  document.querySelectorAll('#f_leaders .lpick-btn').forEach(el=>{
+    const color=el.dataset.color;
+    if(names.includes(el.dataset.name)){
+      el.classList.add('on');
+      el.style.cssText=`color:white;border-color:${color};background:${color};`;
+    }else{
+      el.classList.remove('on');
+      el.style.cssText=`color:${color};border-color:${color}33;background:${color}0D;`;
+    }
+  });
+}
+
+// ---- Type Change Handler ----
+function onTypeChange(){
+  const tp=document.getElementById('f_type').value;
+  const isTrip=tp==='出差';
+  document.getElementById('time_fields').style.display=isTrip?'none':'';
+  document.getElementById('end_date_field').style.display=isTrip?'':'none';
+  document.getElementById('f_start').required=!isTrip;
+  document.getElementById('f_end_date').required=isTrip;
+  document.getElementById('date_label_text').textContent=isTrip?'出发日期':'日期';
+  // Auto-fill end date when switching to trip mode
+  if(isTrip&&!document.getElementById('f_end_date').value){
+    document.getElementById('f_end_date').value=document.getElementById('f_date').value;
+  }
 }
 
 function setDate(d){cd=new Date(d.getFullYear(),d.getMonth(),d.getDate());updNav();updWS();load();}
@@ -416,8 +488,16 @@ async function load(){
   try{
     D=await(await fetch('/api/schedules')).json();
     document.getElementById('syncTime').textContent='更新: '+new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'});
-    const s=document.getElementById('ws'),days=s.querySelectorAll('.day'),d=new Date(cd),dw=d.getDay()||7,m=new Date(d);m.setDate(d.getDate()-dw+1);
-    days.forEach((el,i)=>{const dy=new Date(m);dy.setDate(m.getDate()+i);if(D.some(x=>x.date===fmt(dy))&&!el.querySelector('.dot')){const dot=document.createElement('div');dot.className='dot';el.appendChild(dot);}});
+    // Update week strip dots
+    const s=document.getElementById('ws'),days=s.querySelectorAll('.day'),d=new Date(cd),dw=d.getDay()||7,m=new Date(d);
+    m.setDate(d.getDate()-dw+1);
+    days.forEach((el,i)=>{
+      const dy=new Date(m);dy.setDate(m.getDate()+i);
+      const ds2=fmt(dy);
+      if(D.some(x=>dateInRange(x,ds2))&&!el.querySelector('.dot')){
+        const dot=document.createElement('div');dot.className='dot';el.appendChild(dot);
+      }
+    });
     render();
     renderDash();
     renderLeaderKanban();
@@ -428,38 +508,58 @@ async function load(){
 function typeTag(type){
   if(type==='来访')return '<span class="type-tag type-visit">来访</span>';
   if(type==='出访')return '<span class="type-tag type-out">出访</span>';
+  if(type==='出差')return '<span class="type-tag type-trip">出差</span>';
   return '';
 }
 
 function render(){
-  const ds=fmt(cd);let items=D.filter(s=>s.date===ds);
-  document.getElementById('sum').innerHTML=`<div><strong>${items.length}</strong>条行程</div><div><strong>${new Set(items.map(s=>s.leader)).size}</strong>位领导</div>`;
+  const ds=fmt(cd);
+  let items=D.filter(s=>dateInRange(s,ds));
+  const allLeaders=new Set(items.flatMap(s=>getLeaders(s)));
+  document.getElementById('sum').innerHTML=`<div><strong>${items.length}</strong>条行程</div><div><strong>${allLeaders.size}</strong>位领导</div>`;
   if(!items.length){document.getElementById('fb').innerHTML='';document.getElementById('ct').innerHTML='<div class="empty"><div class="icon">📭</div><div class="msg">当日暂无行程安排</div></div>';return;}
   rAll(items);
 }
 
 function schCard(s,showLeader){
-  const l=L.find(x=>x.name===s.leader);const c=l?l.color:'#999';
+  const lArr=getLeaders(s);
+  const isTrip=s.type==='出差'&&s.end_date;
+  let timeHtml;
+  if(isTrip){
+    timeHtml=`<span class="trip-tag">✈️出差</span><div class="t2" style="margin-top:3px;">${s.date.slice(5)}↓<br>${s.end_date.slice(5)}</div>`;
+  }else if(s.is_allday){
+    timeHtml='<span class="allday-tag">全天</span>';
+  }else{
+    timeHtml=`<div class="t1">${s.start_time}</div><div class="t2">${s.end_time||''}</div>`;
+  }
   const tt=typeTag(s.type);
+  let leaderHtml='';
+  if(showLeader&&lArr.length){
+    leaderHtml=lArr.map(name=>{
+      const l=L.find(x=>x.name===name);const c=l?l.color:'#999';
+      return `<span style="background:${c}15;color:${c};padding:1px 8px;border-radius:10px;font-size:11px;font-weight:500;">${l?l.display:name}</span>`;
+    }).join(' ')+' ';
+  }
   return `<div class="sch-item" onclick="openDetail('${s.id}')">
-    <div class="sch-time">${s.is_allday?'<span class="allday-tag">全天</span>':`<div class="t1">${s.start_time}</div><div class="t2">${s.end_time||''}</div>`}</div>
-    <div class="sch-body"><div class="sch-title">${s.title}${tt?' '+tt:''}</div>
-      <div class="sch-meta">${showLeader?`<span style="background:${c}15;color:${c};padding:1px 8px;border-radius:10px;font-size:11px;font-weight:500;">${l?l.display:s.leader}</span> `:''}${s.location?'📍'+s.location:''}</div>
+    <div class="sch-time">${timeHtml}</div>
+    <div class="sch-body"><div class="sch-title">${s.title}${tt&&s.type!=='出差'?' '+tt:''}</div>
+      <div class="sch-meta">${leaderHtml}${s.location?'📍'+s.location:''}</div>
       ${s.preparation?`<div class="sch-meta" style="color:var(--orange);">📋 ${s.preparation.length>20?s.preparation.slice(0,20)+'…':s.preparation}</div>`:''}
     </div><div class="sch-arrow">›</div></div>`;
 }
 
 function dayBar(items){
   const tot=WE-WS;
-  const timed=items.filter(s=>!s.is_allday&&s.start_min!=null).sort((a,b)=>a.start_min-b.start_min);
-  if(!timed.length&&!items.some(s=>s.is_allday))return '';
-  if(items.some(s=>s.is_allday)&&!timed.length){
-    const l=L.find(x=>x.name===items[0].leader);const c=l?l.color:'var(--red)';
-    return `<div class="day-bar-wrap"><div class="day-bar-track"><div style="flex:1;height:100%;background:${c};opacity:0.8;border-radius:5px;"></div></div><div class="day-bar-lbls"><div class="day-bar-lbl" style="left:50%;transform:translateX(-50%)">全天</div></div></div>`;
+  const timed=items.filter(s=>!s.is_allday&&!(s.type==='出差'&&s.end_date)&&s.start_min!=null).sort((a,b)=>a.start_min-b.start_min);
+  const hasSpecial=items.some(s=>s.is_allday||(s.type==='出差'&&s.end_date));
+  if(!timed.length&&!hasSpecial)return '';
+  if(hasSpecial&&!timed.length){
+    const lbl=items.some(s=>s.type==='出差'&&s.end_date)?'出差中':'全天';
+    return `<div class="day-bar-wrap"><div class="day-bar-track"><div style="flex:1;height:100%;background:var(--red);opacity:0.8;border-radius:5px;"></div></div><div class="day-bar-lbls"><div class="day-bar-lbl" style="left:50%;transform:translateX(-50%)">${lbl}</div></div></div>`;
   }
   let segs=[],cur=WS,labels=[];
   timed.forEach(s=>{
-    const l=L.find(x=>x.name===s.leader);const c=l?l.color:'var(--red)';
+    const lArr=getLeaders(s);const l=L.find(x=>x.name===lArr[0]);const c=l?l.color:'var(--red)';
     const st=Math.max(WS,s.start_min);const en=Math.min(WE,s.end_min||s.start_min+60);
     if(st>cur)segs.push({t:'free',v:st-cur});
     if(en>cur){
@@ -478,41 +578,25 @@ function dayBar(items){
 }
 
 function rAll(items){
-  const p=[...new Set(items.map(s=>s.leader))];
+  // Collect all unique leaders from multi-leader events
+  const leaderNames=[...new Set(items.flatMap(s=>getLeaders(s)))].filter(n=>L.some(l=>l.name===n));
   const bar=document.getElementById('fb');bar.className='leader-filter';
-  bar.innerHTML=`<div class="lf-chip ${cl==='all'?'active':''}" onclick="setLF('all')">全部</div>`+p.map(n=>{const l=L.find(x=>x.name===n);const c=l?l.color:'#999';return `<div class="lf-chip ${cl===n?'active':''}" onclick="setLF('${n}')" ${cl===n?'':`style="border-color:${c};color:${c}"`}>${l?l.display:n}</div>`;}).join('');
-  let f=cl==='all'?items:items.filter(s=>s.leader===cl);
+  bar.innerHTML=`<div class="lf-chip ${cl==='all'?'active':''}" onclick="setLF('all')">全部</div>`+
+    leaderNames.map(n=>{const l=L.find(x=>x.name===n);const c=l?l.color:'#999';
+      return `<div class="lf-chip ${cl===n?'active':''}" onclick="setLF('${n}')" ${cl===n?'':`style="border-color:${c};color:${c}"`}>${l?l.display:n}</div>`;
+    }).join('');
+  let f=cl==='all'?items:items.filter(s=>getLeaders(s).includes(cl));
   const bar2=dayBar(f);
   document.getElementById('ct').innerHTML='<div class="timeline">'+(bar2?bar2:'')+f.map(s=>('<div class="time-bar">'+schCard(s,true)+'</div>')).join('')+'</div>';
 }
 
-function rLdr(items){
-  document.getElementById('fb').innerHTML='';
-  const groups={};L.forEach(l=>{const s=items.filter(x=>x.leader===l.name);if(s.length)groups[l.name]=s;});
-  let h='<div class="timeline">';
-  for(const[name,scheds]of Object.entries(groups)){
-    const l=L.find(x=>x.name===name);const c=l?l.color:'#999';
-    h+=`<div class="tl-group"><div class="tl-leader"><div class="tl-dot" style="background:${c}"></div><div class="tl-name">${l?l.display:name}</div><div class="tl-cnt">${scheds.length}</div></div>`;
-    const busy=scheds.filter(s=>!s.is_allday&&s.start_min!=null).sort((a,b)=>a.start_min-b.start_min);
-    const hasAll=scheds.some(s=>s.is_allday);
-    if(hasAll){
-      h+=`<div class="time-bar" style="cursor:default;"><div style="padding:6px 8px;"><div class="time-slots"><div class="time-slot busy" style="flex:1;font-size:10px;">全天忙碌</div></div>${tLabels()}</div></div>`;
-    }else if(busy.length){
-      let segs=[],cur=WS;busy.forEach(s=>{if(s.start_min>cur)segs.push({t:'free',s:cur,e:s.start_min});segs.push({t:'busy',s:Math.max(cur,s.start_min),e:s.end_min,title:s.title});cur=Math.max(cur,s.end_min);});if(cur<WE)segs.push({t:'free',s:cur,e:WE});
-      const tot=WE-WS;h+=`<div class="time-bar" style="cursor:default;"><div style="padding:6px 8px;"><div class="time-slots">`;
-      segs.forEach(seg=>{const pct=((seg.e-seg.s)/tot*100).toFixed(1);const lb=seg.t==='busy'?(seg.title.length>6?seg.title.slice(0,6)+'…':seg.title):'空闲';h+=`<div class="time-slot ${seg.t}" style="flex:${pct}">${pct>8?lb:''}</div>`;});
-      h+=`</div>${tLabels()}</div></div>`;
-    }
-    h+='<div class="time-bar">'+scheds.map(s=>schCard(s,false)).join('')+'</div></div>';
-  }
-  const free=L.filter(l=>!groups[l.name]);
-  if(free.length){h+='<div style="margin-top:12px;padding:12px;background:white;border-radius:10px;"><div style="font-size:12px;color:var(--text3);margin-bottom:8px;">🟢 以下领导当日暂无行程</div><div style="display:flex;flex-wrap:wrap;gap:8px;">'+free.map(l=>`<span style="font-size:12px;padding:3px 10px;border-radius:12px;background:${l.color}10;color:${l.color};font-weight:500;">${l.display}</span>`).join('')+'</div></div>';}
-  h+='</div>';document.getElementById('ct').innerHTML=h;
-}
-
 function setLF(n){cl=n;render();}
 
-function showToast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),1600);}
+function showToast(msg,isErr){
+  const t=document.createElement('div');t.className='toast';t.textContent=msg;
+  if(isErr)t.style.background='rgba(196,30,47,0.9)';
+  document.body.appendChild(t);setTimeout(()=>t.remove(),1600);
+}
 
 // ---- Time Labels ----
 function tLabels(){
@@ -533,7 +617,7 @@ function renderDash(){
   for(let i=0;i<30;i++){
     const d=new Date(today);d.setDate(today.getDate()+i);
     const ds=fmt(d);
-    const dayItems=D.filter(s=>s.date===ds).sort((a,b)=>(a.start_time||'').localeCompare(b.start_time||''));
+    const dayItems=D.filter(s=>dateInRange(s,ds)).sort((a,b)=>(a.start_time||'').localeCompare(b.start_time||''));
     if(dayItems.length)upcoming.push({date:d,ds,items:dayItems});
   }
   const wrap=document.getElementById('dashWrap');
@@ -545,10 +629,15 @@ function renderDash(){
     if(diff===0)label+=' (今天)';else if(diff===1)label+=' (明天)';else if(diff===2)label+=' (后天)';
     h+=`<div class="dash-date-group"><div class="dash-date">${label} · ${g.items.length}条</div>`;
     g.items.forEach(s=>{
-      const l=L.find(x=>x.name===s.leader);const c=l?l.color:'#999';
-      const tm=s.is_allday?'全天':s.start_time||'--';
+      const lArr=getLeaders(s);
+      const l=L.find(x=>x.name===lArr[0]);const c=l?l.color:'#999';
+      const isTrip=s.type==='出差'&&s.end_date;
+      const tm=isTrip?'出差':(s.is_allday?'全天':s.start_time||'--');
       const tt=typeTag(s.type);
-      h+=`<div class="dash-item" onclick="goDateAndDetail('${g.ds}','${s.id}')"><div class="dash-leader-dot" style="background:${c}"></div><div class="dash-time">${tm}</div><div class="dash-info"><div class="dash-info-title">${s.title}${tt?' '+tt:''}</div><div class="dash-info-leader">${l?l.display:s.leader}${s.location?' · '+s.location:''}</div></div></div>`;
+      const leaderLabel=lArr.length>1
+        ?lArr.map(n=>{const ll=L.find(x=>x.name===n);const lc=ll?ll.color:'#999';return `<span style="color:${lc};font-weight:600;">${ll?ll.display:n}</span>`;}).join('·')
+        :(l?l.display:lArr[0]||'');
+      h+=`<div class="dash-item" onclick="goDateAndDetail('${g.ds}','${s.id}')"><div class="dash-leader-dot" style="background:${c}"></div><div class="dash-time">${tm}</div><div class="dash-info"><div class="dash-info-title">${s.title}${tt?' '+tt:''}</div><div class="dash-info-leader">${leaderLabel}${s.location?' · '+s.location:''}</div></div></div>`;
     });
     h+='</div>';
   });
@@ -565,7 +654,11 @@ function goDateAndDetail(ds,id){
 function renderLeaderKanban(){
   const today=fmt(new Date());
   document.getElementById('leaderKanban').innerHTML=L.map(l=>{
-    const upcoming=D.filter(s=>s.leader===l.name&&s.date>=today).length;
+    const upcoming=D.filter(s=>{
+      if(!getLeaders(s).includes(l.name))return false;
+      const effectiveEnd=(s.type==='出差'&&s.end_date)?s.end_date:s.date;
+      return effectiveEnd>=today;
+    }).length;
     const cntColor=upcoming?l.color:'var(--text3)';
     const cntText=upcoming?upcoming+'条待办':'暂无安排';
     return `<div class="lk-card" onclick="openLeaderScreen('${l.name}')" style="border-top-color:${l.color};">
@@ -595,9 +688,12 @@ function closeLeaderScreen(){
 
 function miniBar(items){
   const tot=WE-WS;
-  const busy=items.filter(s=>!s.is_allday&&s.start_min!=null).sort((a,b)=>a.start_min-b.start_min);
-  if(items.some(s=>s.is_allday)){
-    return '<div class="ls-mini-wrap"><div class="ls-mini-bar"><div class="ls-mini-seg busy" style="flex:1"></div></div><div class="ls-mini-labels"><div class="ls-mini-lbl" style="left:50%;transform:translateX(-50%)">全天</div></div></div>';
+  const hasTrip=items.some(s=>s.type==='出差'&&s.end_date);
+  const hasAllDay=items.some(s=>s.is_allday);
+  const busy=items.filter(s=>!s.is_allday&&!(s.type==='出差'&&s.end_date)&&s.start_min!=null).sort((a,b)=>a.start_min-b.start_min);
+  if(hasTrip||hasAllDay){
+    const lbl=hasTrip?'出差':'全天';
+    return `<div class="ls-mini-wrap"><div class="ls-mini-bar"><div class="ls-mini-seg busy" style="flex:1"></div></div><div class="ls-mini-labels"><div class="ls-mini-lbl" style="left:50%;transform:translateX(-50%)">${lbl}</div></div></div>`;
   }
   if(!busy.length)return '<div class="ls-mini-wrap"><div class="ls-mini-bar"><div class="ls-mini-seg free" style="flex:1"></div></div></div>';
   let segs=[],cur=WS,labels=[];
@@ -645,11 +741,15 @@ function buildDateGroups(list,today){
         </div>`;
       items.forEach(s=>{
         const tt=typeTag(s.type);
+        const isTrip=s.type==='出差'&&s.end_date;
         h+=`<div class="ls-item" onclick="openDetail('${s.id}')">
-          <div class="ls-item-time">${s.is_allday?'全天':(s.start_time||'--')}</div>
+          <div class="ls-item-time">${isTrip?'✈️出差':(s.is_allday?'全天':(s.start_time||'--'))}</div>
           <div class="ls-item-body">
-            <div class="ls-item-title">${s.title}${tt?' '+tt:''}</div>
-            ${s.location?`<div class="ls-item-meta">📍 ${s.location}</div>`:''}
+            <div class="ls-item-title">${s.title}${tt&&!isTrip?' '+tt:''}</div>
+            ${isTrip
+              ?`<div class="ls-item-meta">📅 ${s.date.slice(5)} 至 ${s.end_date.slice(5)}</div>`
+              :(s.location?`<div class="ls-item-meta">📍 ${s.location}</div>`:'')
+            }
           </div>
           <div class="sch-arrow">›</div>
         </div>`;
@@ -662,31 +762,34 @@ function buildDateGroups(list,today){
 
 function renderLeaderSchedule(name){
   const today=fmt(new Date());
-  const all=D.filter(s=>s.leader===name).sort((a,b)=>
-    a.date!==b.date?a.date.localeCompare(b.date):(a.start_min||0)-(b.start_min||0));
-  const upcomingList=all.filter(s=>s.date>=today);
-  const pastList=all.filter(s=>s.date<today);
+  const all=D.filter(s=>getLeaders(s).includes(name))
+    .sort((a,b)=>a.date!==b.date?a.date.localeCompare(b.date):(a.start_min||0)-(b.start_min||0));
+  const upcomingList=all.filter(s=>{
+    const effectiveEnd=(s.type==='出差'&&s.end_date)?s.end_date:s.date;
+    return effectiveEnd>=today;
+  });
+  const pastList=all.filter(s=>{
+    const effectiveEnd=(s.type==='出差'&&s.end_date)?s.end_date:s.date;
+    return effectiveEnd<today;
+  });
 
   document.getElementById('lsStats').innerHTML=
     `<div>未来待办 <strong style="color:var(--red)">${upcomingList.length}</strong> 条</div>`+
     `<div>共 <strong style="color:var(--text2)">${all.length}</strong> 条记录</div>`;
 
   let h='';
-
   if(!upcomingList.length){
     h+='<div class="empty"><div class="icon">📭</div><div class="msg">暂无未来行程安排</div></div>';
   }else{
     h+=buildDateGroups(upcomingList,today);
   }
 
-  // 以往行程入口
   if(pastList.length){
     if(!showPast){
       h+=`<div class="past-toggle" onclick="togglePast('${name}')">查看以往行程（${pastList.length}条）▾</div>`;
     }else{
       h+=`<div class="past-toggle" onclick="togglePast('${name}')">收起以往行程 ▴</div>`;
       h+=`<div class="past-section-label">— 以往行程 —</div>`;
-      // 倒序展示（最近的在最前）
       const pastSorted=[...pastList].reverse();
       h+=buildDateGroups(pastSorted,today);
     }
@@ -700,7 +803,6 @@ function togglePast(name){
   showPast=!showPast;
   renderLeaderSchedule(name);
   if(showPast){
-    // 滚动到以往行程区域
     setTimeout(()=>{
       const tog=document.querySelector('.past-toggle');
       if(tog)tog.scrollIntoView({behavior:'smooth',block:'start'});
@@ -711,18 +813,31 @@ function togglePast(name){
 // ---- Detail Modal ----
 function openDetail(id){
   const s=D.find(x=>x.id===id);if(!s)return;
-  const l=L.find(x=>x.name===s.leader);const c=l?l.color:'#999';
+  const lArr=getLeaders(s);
   document.getElementById('detailTitle').textContent=s.title;
-  let h='';
-  const row=(label,val,isTag)=>{
-    if(!val)return `<div class="detail-row"><div class="detail-label">${label}</div><div class="detail-value empty-val">未填写</div></div>`;
-    if(isTag)return `<div class="detail-row"><div class="detail-label">${label}</div><div class="detail-value"><span class="detail-tag" style="background:${c}15;color:${c};">${val}</span></div></div>`;
-    return `<div class="detail-row"><div class="detail-label">${label}</div><div class="detail-value">${val}</div></div>`;
+  const row=(label,val)=>{
+    const display=val?val:'<span class="empty-val">未填写</span>';
+    return `<div class="detail-row"><div class="detail-label">${label}</div><div class="detail-value">${display}</div></div>`;
   };
-  h+=row('领导',l?l.display:s.leader,true);
+  let h='';
+  // Show all participating leaders
+  const leaderTags=lArr.map(name=>{
+    const l=L.find(x=>x.name===name);const c=l?l.color:'#999';
+    return `<span class="detail-tag" style="background:${c}15;color:${c};">${l?l.display:name}</span>`;
+  }).join(' ');
+  h+=`<div class="detail-row"><div class="detail-label">参与领导</div><div class="detail-value">${leaderTags||'未知'}</div></div>`;
+
   if(s.type){h+=`<div class="detail-row"><div class="detail-label">行程类型</div><div class="detail-value">${typeTag(s.type)}</div></div>`;}
-  h+=row('时间',s.is_allday?'全天':`${s.start_time}${s.end_time?' — '+s.end_time:''}`);
-  h+=row('日期',s.date+' 星期'+WD[new Date(s.date+'T00:00:00').getDay()]);
+
+  // Time/date display depends on type
+  const isTrip=s.type==='出差'&&s.end_date;
+  if(isTrip){
+    h+=row('出差日期',`${s.date} 至 ${s.end_date}`);
+  }else{
+    h+=row('日期',s.date+' 星期'+WD[new Date(s.date+'T00:00:00').getDay()]);
+    h+=row('时间',s.is_allday?'全天':`${s.start_time}${s.end_time?' — '+s.end_time:''}`);
+  }
+
   h+=row('来访领导',s.participants);
   h+=row('地点',s.location);
   h+=row('来访领导陪同人',s.companion);
@@ -753,6 +868,8 @@ function openCreate(){
   document.getElementById('f_submit').textContent='提交录入';
   document.getElementById('createForm').reset();
   document.getElementById('f_date').value=fmt(cd);
+  setSelectedLeaders([]);
+  onTypeChange(); // Reset form UI (type is empty = non-trip)
   document.getElementById('createModal').classList.add('show');
 }
 
@@ -763,8 +880,10 @@ function openEdit(id){
   document.getElementById('createModalTitle').textContent='编辑行程';
   document.getElementById('f_submit').textContent='保存修改';
   document.getElementById('f_type').value=s.type||'';
-  document.getElementById('f_leader').value=s.leader;
+  onTypeChange(); // Update form UI based on type
+  setSelectedLeaders(getLeaders(s));
   document.getElementById('f_date').value=s.date;
+  if(s.end_date)document.getElementById('f_end_date').value=s.end_date;
   document.getElementById('f_start').value=s.start_time||'';
   document.getElementById('f_end').value=s.end_time||'';
   document.getElementById('f_title').value=s.title||'';
@@ -783,14 +902,23 @@ function closeCreate(){document.getElementById('createModal').classList.remove('
 
 async function submitCreate(e){
   e.preventDefault();
+  const selectedLeaders=getSelectedLeaders();
+  if(!selectedLeaders.length){showToast('请选择至少一位参与领导',true);return;}
+  const isTrip=document.getElementById('f_type').value==='出差';
+  const endDate=document.getElementById('f_end_date').value;
+  if(isTrip&&!endDate){showToast('请填写返回日期',true);return;}
+  if(isTrip&&endDate<document.getElementById('f_date').value){showToast('返回日期不能早于出发日期',true);return;}
+
   const btn=document.getElementById('f_submit');btn.disabled=true;btn.textContent=editId?'保存中...':'提交中...';
   try{
     const body={
       type:document.getElementById('f_type').value,
-      leader:document.getElementById('f_leader').value,
+      leaders:selectedLeaders,
+      leader:selectedLeaders[0],
       date:document.getElementById('f_date').value,
-      start_time:document.getElementById('f_start').value,
-      end_time:document.getElementById('f_end').value,
+      end_date:isTrip?endDate:'',
+      start_time:isTrip?'':document.getElementById('f_start').value,
+      end_time:isTrip?'':document.getElementById('f_end').value,
       title:document.getElementById('f_title').value,
       location:document.getElementById('f_location').value,
       participants:document.getElementById('f_participants').value,
@@ -811,7 +939,7 @@ async function submitCreate(e){
     if(d.success){
       const wasEdit=!!editId;
       const newDate=document.getElementById('f_date').value;
-      closeCreate();document.getElementById('createForm').reset();
+      closeCreate();document.getElementById('createForm').reset();setSelectedLeaders([]);
       if(wasEdit){
         showToast('修改成功');
         setTimeout(()=>{
@@ -824,8 +952,7 @@ async function submitCreate(e){
         showToast('添加成功');
         setTimeout(()=>load(),500);
       }
-    }
-    else{alert((editId?'修改':'提交')+'失败: '+(d.error||'未知错误'));}
+    }else{alert((editId?'修改':'提交')+'失败: '+(d.error||'未知错误'));}
   }catch(err){alert('网络错误: '+err.message);}
   btn.disabled=false;btn.textContent=editId?'保存修改':'提交录入';
 }
@@ -875,7 +1002,7 @@ function doSearch(){
     _searchResults=[];return;
   }
   const ql=q.toLowerCase();
-  const fields=s=>[s.title,s.participants,s.location,s.companion,s.notes,s.preparation,s.accommodation,s.leader,s.vehicle];
+  const fields=s=>[s.title,s.participants,s.location,s.companion,s.notes,s.preparation,s.accommodation,...getLeaders(s),s.vehicle];
   const results=D.filter(s=>fields(s).some(f=>f&&f.toLowerCase().includes(ql)));
   results.sort((a,b)=>a.date!==b.date?a.date.localeCompare(b.date):(a.start_min||0)-(b.start_min||0));
   _searchResults=results;
@@ -889,8 +1016,10 @@ function doSearch(){
   const today=fmt(new Date());
   let h='',lastDate='';
   results.forEach(s=>{
-    const l=L.find(x=>x.name===s.leader);const c=l?l.color:'#999';
+    const lArr=getLeaders(s);
+    const l=L.find(x=>x.name===lArr[0]);const c=l?l.color:'#999';
     const tt=typeTag(s.type);
+    const isTrip=s.type==='出差'&&s.end_date;
     if(s.date!==lastDate){
       if(lastDate)h+='</div></div>';
       const dobj=new Date(s.date+'T00:00:00');
@@ -900,15 +1029,18 @@ function doSearch(){
       h+=`<div class="search-group-date">${dl}</div><div class="search-group-box">`;
       lastDate=s.date;
     }
+    const leaderLabel=lArr.length>1
+      ?lArr.map(n=>{const ll=L.find(x=>x.name===n);const lc=ll?ll.color:'#999';return `<span style="background:${lc}18;color:${lc};padding:1px 6px;border-radius:8px;font-size:10px;font-weight:600;">${ll?ll.display:n}</span>`;}).join(' ')
+      :`<span style="background:${c}18;color:${c};padding:1px 6px;border-radius:8px;font-size:10px;font-weight:600;">${l?l.display:lArr[0]||''}</span>`;
     const matchMeta=[];
     if(s.participants&&s.participants.toLowerCase().includes(ql))matchMeta.push('来访: '+hlText(s.participants,q));
     if(s.location&&s.location.toLowerCase().includes(ql))matchMeta.push('📍 '+hlText(s.location,q));
     if(s.companion&&s.companion.toLowerCase().includes(ql))matchMeta.push('陪同: '+hlText(s.companion,q));
     if(s.notes&&s.notes.toLowerCase().includes(ql))matchMeta.push('备注: '+hlText(s.notes.slice(0,25),q));
     if(s.preparation&&s.preparation.toLowerCase().includes(ql))matchMeta.push('筹备: '+hlText(s.preparation.slice(0,25),q));
-    const leaderLabel=`<span style="background:${c}18;color:${c};padding:1px 6px;border-radius:8px;font-size:10px;font-weight:600;">${l?l.display:s.leader}</span>`;
+    const timeDisp=isTrip?'出差':(s.is_allday?'全天':(s.start_time||'--'));
     h+=`<div class="search-res-item" onclick="openDetail('${s.id}')">
-      <div class="search-res-time">${s.is_allday?'全天':(s.start_time||'--')}</div>
+      <div class="search-res-time">${timeDisp}</div>
       <div class="search-res-body">
         <div class="search-res-title">${hlText(s.title,q)}${tt?' '+tt:''}</div>
         <div class="search-res-meta">${leaderLabel}${matchMeta.length?' &nbsp;'+matchMeta.join(' · '):''}</div>
@@ -937,17 +1069,19 @@ function csvVal(v){
 
 function exportItems(items,filename){
   if(!items||!items.length){showToast('没有数据可导出');return;}
-  const header=['日期','星期','开始时间','结束时间','事项','领导','行程类型','来访领导','地点','来访领导陪同人','调研行程安排','车辆安排','食宿安排','重要程度','我方陪同人'];
+  const header=['日期','星期','开始时间','结束时间','返回日期','事项','参与领导','行程类型','来访领导','地点','来访领导陪同人','调研行程安排','车辆安排','食宿安排','重要程度','我方陪同人'];
   const rows=[header.join(',')];
   items.forEach(s=>{
     const dobj=new Date(s.date+'T00:00:00');
+    const isTrip=s.type==='出差'&&s.end_date;
     rows.push([
       s.date,
       '星期'+WD[dobj.getDay()],
-      s.is_allday?'全天':(s.start_time||''),
-      s.end_time||'',
+      isTrip?'出差':(s.is_allday?'全天':(s.start_time||'')),
+      isTrip?'':(s.end_time||''),
+      s.end_date||'',
       s.title||'',
-      s.leader||'',
+      getLeaders(s).join('、'),
       s.type||'',
       s.participants||'',
       s.location||'',
@@ -959,7 +1093,7 @@ function exportItems(items,filename){
       s.notes||''
     ].map(csvVal).join(','));
   });
-  const blob=new Blob(['\uFEFF'+rows.join('\r\n')],{type:'text/csv;charset=utf-8;'});
+  const blob=new Blob(['﻿'+rows.join('\r\n')],{type:'text/csv;charset=utf-8;'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();
   setTimeout(()=>{URL.revokeObjectURL(url);a.remove();},1000);
@@ -968,7 +1102,7 @@ function exportItems(items,filename){
 
 function exportLeader(name){
   if(!name)return;
-  const items=D.filter(s=>s.leader===name).sort((a,b)=>a.date!==b.date?a.date.localeCompare(b.date):(a.start_min||0)-(b.start_min||0));
+  const items=D.filter(s=>getLeaders(s).includes(name)).sort((a,b)=>a.date!==b.date?a.date.localeCompare(b.date):(a.start_min||0)-(b.start_min||0));
   const l=L.find(x=>x.name===name);
   exportItems(items,(l?l.display:name)+'_全部行程_'+fmt(new Date())+'.csv');
 }

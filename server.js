@@ -57,12 +57,18 @@ async function feishuAPI(method, apiPath, data) {
 }
 
 function parseTime(t) {
-  if (!t || t === '全天') return null;
+  if (!t || t === '全天' || t === '出差') return null;
+  // Skip date strings stored as end_time for trips
+  if (/^\d{4}-\d{2}-\d{2}$/.test(t)) return null;
   let m = t.match(/(\d{1,2})[点時](\d{1,2}|半)?/);
   if (m) return parseInt(m[1]) * 60 + (m[2] === '半' ? 30 : (m[2] ? parseInt(m[2]) : 0));
   m = t.match(/(\d{1,2})[：:](\d{2})/);
   if (m) return parseInt(m[1]) * 60 + parseInt(m[2]);
   return null;
+}
+
+function isDateStr(s) {
+  return typeof s === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s);
 }
 
 app.use(express.json());
@@ -83,20 +89,43 @@ app.get('/api/schedules', async (req, res) => {
     const schedules = all.map(rec => {
       const f = rec.fields;
       let dateStr = '';
-      if (f['日期']) { const d = new Date(f['日期']); dateStr = d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')+'-'+String(d.getUTCDate()).padStart(2,'0'); }
-      const sm = parseTime(f['开始时间']), em = parseTime(f['结束时间']);
+      if (f['日期']) {
+        const d = new Date(f['日期']);
+        dateStr = d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')+'-'+String(d.getUTCDate()).padStart(2,'0');
+      }
+
+      // Support comma-separated multiple leaders
+      const leadersRaw = (f['领导姓名'] || '').trim();
+      const leaders = leadersRaw ? leadersRaw.split(/[,，]+/).map(s => s.trim()).filter(Boolean) : [];
+
+      const type = f['行程类型'] || '';
+      const startTimeRaw = f['开始时间'] || '';
+      const endTimeRaw = f['结束时间'] || '';
+
+      // For 出差 type: 结束时间 stores the end date (YYYY-MM-DD)
+      const isTrip = type === '出差' || startTimeRaw === '出差';
+      const endDate = (isTrip && isDateStr(endTimeRaw)) ? endTimeRaw : '';
+      const startTime = isTrip ? '' : startTimeRaw;
+      const endTime = endDate ? '' : endTimeRaw;
+
+      const sm = parseTime(startTime), em = parseTime(endTime);
       return {
-        id: rec.record_id, leader: f['领导姓名']||'', date: dateStr,
-        start_time: f['开始时间']||'', end_time: f['结束时间']||'',
+        id: rec.record_id,
+        leaders,
+        leader: leaders[0] || '',
+        date: dateStr,
+        end_date: endDate,
+        start_time: startTime, end_time: endTime,
         start_min: sm, end_min: em||(sm?sm+90:null),
         title: f['事项']||'', location: f['地点']||'',
         participants: f['参与人']||'', importance: f['重要程度']||'中',
-        notes: f['备注']||'', is_allday: f['开始时间']==='全天',
+        notes: f['备注']||'', is_allday: startTimeRaw==='全天',
         companion: f['陪同人']||'', preparation: f['筹备内容']||'',
         accommodation: f['食宿安排']||'', vehicle: f['车辆安排']||'',
-        type: f['行程类型']||'',
+        type,
       };
-    }).filter(s => s.date && s.leader);
+    }).filter(s => s.date && s.leaders.length);
+
     schedules.sort((a,b) => a.date!==b.date ? a.date.localeCompare(b.date) : (a.start_min||0)-(b.start_min||0));
     res.json(schedules);
   } catch(e) { res.status(500).json({ error: e.message }); }
@@ -106,10 +135,15 @@ app.get('/api/schedules', async (req, res) => {
 app.post('/api/schedules', async (req, res) => {
   try {
     const s = req.body;
+    const leadersArr = Array.isArray(s.leaders) && s.leaders.length ? s.leaders : (s.leader ? [s.leader] : []);
+    const isTrip = s.type === '出差';
     const dateTs = new Date(s.date + 'T16:00:00Z').getTime();
     const fields = {
-      '事项': s.title, '领导姓名': s.leader, '日期': dateTs,
-      '开始时间': s.start_time, '结束时间': s.end_time||'',
+      '事项': s.title,
+      '领导姓名': leadersArr.join(','),
+      '日期': dateTs,
+      '开始时间': isTrip ? '出差' : (s.start_time || ''),
+      '结束时间': isTrip ? (s.end_date || '') : (s.end_time || ''),
       '地点': s.location||'', '参与人': s.participants||'',
       '重要程度': s.importance||'中', '备注': s.notes||'',
       '陪同人': s.companion||'', '筹备内容': s.preparation||'',
@@ -126,12 +160,17 @@ app.post('/api/schedules', async (req, res) => {
 app.put('/api/schedules/:id', async (req, res) => {
   try {
     const s = req.body;
+    const isTrip = s.type === '出差';
     const fields = {};
     if (s.title) fields['事项'] = s.title;
-    if (s.leader) fields['领导姓名'] = s.leader;
+    if (Array.isArray(s.leaders) && s.leaders.length) {
+      fields['领导姓名'] = s.leaders.join(',');
+    } else if (s.leader) {
+      fields['领导姓名'] = s.leader;
+    }
     if (s.date) fields['日期'] = new Date(s.date + 'T16:00:00Z').getTime();
-    if (s.start_time) fields['开始时间'] = s.start_time;
-    if (s.end_time !== undefined) fields['结束时间'] = s.end_time;
+    fields['开始时间'] = isTrip ? '出差' : (s.start_time !== undefined ? s.start_time : '');
+    fields['结束时间'] = isTrip ? (s.end_date || '') : (s.end_time !== undefined ? s.end_time : '');
     if (s.location !== undefined) fields['地点'] = s.location;
     if (s.participants !== undefined) fields['参与人'] = s.participants;
     if (s.importance) fields['重要程度'] = s.importance;
