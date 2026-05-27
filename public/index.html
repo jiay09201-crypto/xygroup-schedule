@@ -335,11 +335,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans G
           <div class="form-group"><label class="form-label">结束</label><input type="time" class="form-input" id="f_end"></div>
         </div>
         <div class="form-group"><label class="form-label"><span class="req">*</span> 事项</label><input class="form-input" id="f_title" placeholder="行程标题" required></div>
+        <div id="visit_fields">
         <div class="form-row">
           <div class="form-group"><label class="form-label">来访主要领导</label><input class="form-input" id="f_participants" placeholder="来访领导姓名/职务"></div>
           <div class="form-group"><label class="form-label">来访领导陪同人</label><input class="form-input" id="f_companion" placeholder="来访方陪同人员"></div>
         </div>
         <div class="form-group"><label class="form-label">调研行程安排</label><textarea class="form-textarea" id="f_preparation" placeholder="调研参观路线、座谈安排等"></textarea></div>
+        </div>
         <div class="form-group"><label class="form-label">地点</label><input class="form-input" id="f_location" placeholder="默认西影园区，出差请填写目的地"></div>
         <div class="form-row">
           <div class="form-group"><label class="form-label">车辆安排</label><select class="form-select" id="f_vehicle"><option value="">请选择</option><option>需要用车</option><option>自驾</option><option>无需用车</option><option>待确认</option></select></div>
@@ -448,12 +450,13 @@ function setSelectedLeaders(names){
 function onTypeChange(){
   const tp=document.getElementById('f_type').value;
   const isTrip=tp==='出差';
+  const isVisit=tp==='来访';
   document.getElementById('time_fields').style.display=isTrip?'none':'';
   document.getElementById('end_date_field').style.display=isTrip?'':'none';
   document.getElementById('f_start').required=!isTrip;
   document.getElementById('f_end_date').required=isTrip;
   document.getElementById('date_label_text').textContent=isTrip?'出发日期':'日期';
-  // Auto-fill end date when switching to trip mode
+  document.getElementById('visit_fields').style.display=isVisit?'':'none';
   if(isTrip&&!document.getElementById('f_end_date').value){
     document.getElementById('f_end_date').value=document.getElementById('f_date').value;
   }
