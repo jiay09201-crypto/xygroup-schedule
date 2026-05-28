@@ -1,0 +1,53 @@
+name: Deploy to Alibaba Cloud FC
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Package code
+        run: zip -r code.zip . --exclude "*.git*" --exclude "*/.git/*" --exclude "node_modules/*"
+
+      - name: Deploy to FC
+        env:
+          AK_ID: ${{ secrets.ALIYUN_AK_ID }}
+          AK_SECRET: ${{ secrets.ALIYUN_AK_SECRET }}
+        run: |
+          python3 - <<'EOF'
+          import hmac, hashlib, base64, datetime, json, urllib.request, urllib.error, os
+
+          AK_ID = os.environ['AK_ID']
+          AK_SECRET = os.environ['AK_SECRET']
+          ACCOUNT_ID = "1535915875535636"
+          REGION = "cn-hongkong"
+          FUNC_NAME = "xygroup-schedule"
+
+          with open('code.zip', 'rb') as f:
+              zip_b64 = base64.b64encode(f.read()).decode()
+
+          body = json.dumps({"code": {"zipFile": zip_b64}}).encode()
+          host = f"{ACCOUNT_ID}.{REGION}.fc.aliyuncs.com"
+          path = f"/2023-03-30/functions/{FUNC_NAME}/code"
+          content_md5 = base64.b64encode(hashlib.md5(body).digest()).decode()
+          content_type = "application/json"
+          date = datetime.datetime.utcnow().strftime("%a, %d %b %Y %H:%M:%S GMT")
+          string_to_sign = f"PUT\n{content_md5}\n{content_type}\n{date}\nx-fc-account-id:{ACCOUNT_ID}\n{path}"
+          sig = base64.b64encode(hmac.new(AK_SECRET.encode(), string_to_sign.encode(), hashlib.sha256).digest()).decode()
+          headers = {
+              "Host": host, "Date": date, "Content-Type": content_type,
+              "Content-MD5": content_md5, "x-fc-account-id": ACCOUNT_ID,
+              "Authorization": f"FC {AK_ID}:{sig}", "Content-Length": str(len(body)),
+          }
+          req = urllib.request.Request(f"https://{host}{path}", data=body, headers=headers, method="PUT")
+          try:
+              with urllib.request.urlopen(req, timeout=60) as resp:
+                  print("Deploy SUCCESS:", resp.status)
+          except urllib.error.HTTPError as e:
+              print("Deploy FAILED:", e.code, e.read().decode()[:500])
+              exit(1)
+          EOF
