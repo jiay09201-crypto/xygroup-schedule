@@ -19,6 +19,7 @@ const LEADERS = [
   { name: '肖总', display: '肖', color: '#389E0D' },
   { name: '孟总', display: '孟', color: '#722ED1' },
   { name: '别书记', display: '别', color: '#C41D7F' },
+  { name: '闫总', display: '闫', color: '#13C2C2' },
 ];
 
 let tokenCache = { token: '', expire: 0 };
