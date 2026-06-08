@@ -699,24 +699,29 @@ function miniBar(items){
     return `<div class="ls-mini-wrap"><div class="ls-mini-bar"><div class="ls-mini-seg busy" style="flex:1"></div></div><div class="ls-mini-labels"><div class="ls-mini-lbl" style="left:50%;transform:translateX(-50%)">${lbl}</div></div></div>`;
   }
   if(!busy.length)return '<div class="ls-mini-wrap"><div class="ls-mini-bar"><div class="ls-mini-seg free" style="flex:1"></div></div></div>';
-  let segs=[],cur=WS,labels=[];
+  let segs=[],cur=WS;
+  const firstStart=busy[0];
+  const lastEnd=busy[busy.length-1];
   busy.forEach(s=>{
     const st=Math.max(WS,s.start_min);
     const en=Math.min(WE,s.end_min||s.start_min+60);
     if(st>cur)segs.push({t:'free',v:st-cur});
     const bv=Math.min(en,WE)-Math.max(st,cur);
-    if(bv>0){
-      segs.push({t:'busy',v:bv});
-      const stPct=((Math.max(st,WS)-WS)/tot*100).toFixed(1);
-      const enPct=((Math.min(en,WE)-WS)/tot*100).toFixed(1);
-      if(s.start_time)labels.push({pct:stPct,txt:s.start_time,side:'l'});
-      if(s.end_time)labels.push({pct:enPct,txt:s.end_time,side:'r'});
-    }
+    if(bv>0)segs.push({t:'busy',v:bv});
     cur=Math.max(cur,en);
   });
   if(cur<WE)segs.push({t:'free',v:WE-cur});
   const bar=segs.map(g=>`<div class="ls-mini-seg ${g.t}" style="flex:${(g.v/tot*100).toFixed(1)}"></div>`).join('');
-  const lbls=labels.map(l=>`<div class="ls-mini-lbl" style="left:${l.pct}%;transform:translateX(${l.side==='r'?'-100%':'0'})">${l.txt}</div>`).join('');
+  // Only show first start and last end to avoid overlap
+  let lbls='';
+  if(firstStart&&firstStart.start_time){
+    const p=((Math.max(firstStart.start_min,WS)-WS)/tot*100).toFixed(1);
+    lbls+=`<div class="ls-mini-lbl" style="left:${p}%">${firstStart.start_time}</div>`;
+  }
+  if(lastEnd&&lastEnd.end_time&&lastEnd!==firstStart){
+    const p=((Math.min(lastEnd.end_min||lastEnd.start_min+60,WE)-WS)/tot*100).toFixed(1);
+    lbls+=`<div class="ls-mini-lbl" style="left:${p}%;transform:translateX(-100%)">${lastEnd.end_time}</div>`;
+  }
   return `<div class="ls-mini-wrap"><div class="ls-mini-bar">${bar}</div><div class="ls-mini-labels">${lbls}</div></div>`;
 }
 
