@@ -402,6 +402,7 @@ function unlock(){
 function showApp(){
   document.getElementById('lockScreen').style.display='none';
   document.getElementById('mainApp').style.display='block';
+  window.scrollTo({top:0,behavior:'instant'});
   init();
 }
 
