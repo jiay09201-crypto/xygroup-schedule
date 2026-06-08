@@ -711,15 +711,20 @@ function miniBar(items){
     cur=Math.max(cur,en);
   });
   if(cur<WE)segs.push({t:'free',v:WE-cur});
-  const bar=segs.map(g=>`<div class="ls-mini-seg ${g.t}" style="flex:${(g.v/tot*100).toFixed(1)}"></div>`).join('');
-  // Only show first start and last end to avoid overlap
+  // Compress free segments to 1/5 so busy segments spread wider, labels don't overlap
+  const fv=g=>g.t==='free'?g.v*0.2:g.v;
+  const totalFlex=segs.reduce((s,g)=>s+fv(g),0);
+  const bar=segs.map(g=>`<div class="ls-mini-seg ${g.t}" style="flex:${fv(g).toFixed(1)}"></div>`).join('');
   let lbls='';
-  if(firstStart&&firstStart.start_time){
-    const p=((Math.max(firstStart.start_min,WS)-WS)/tot*100).toFixed(1);
+  const firstBusyIdx=segs.findIndex(g=>g.t==='busy');
+  if(firstBusyIdx>=0&&firstStart&&firstStart.start_time){
+    const p=(segs.slice(0,firstBusyIdx).reduce((s,g)=>s+fv(g),0)/totalFlex*100).toFixed(1);
     lbls+=`<div class="ls-mini-lbl" style="left:${p}%">${firstStart.start_time}</div>`;
   }
-  if(lastEnd&&lastEnd.end_time&&lastEnd!==firstStart){
-    const p=((Math.min(lastEnd.end_min||lastEnd.start_min+60,WE)-WS)/tot*100).toFixed(1);
+  let lastBusyIdx=segs.length-1;
+  while(lastBusyIdx>=0&&segs[lastBusyIdx].t==='free')lastBusyIdx--;
+  if(lastBusyIdx>=0&&lastEnd&&lastEnd.end_time&&lastEnd!==firstStart){
+    const p=(segs.slice(0,lastBusyIdx+1).reduce((s,g)=>s+fv(g),0)/totalFlex*100).toFixed(1);
     lbls+=`<div class="ls-mini-lbl" style="left:${p}%;transform:translateX(-100%)">${lastEnd.end_time}</div>`;
   }
   return `<div class="ls-mini-wrap"><div class="ls-mini-bar">${bar}</div><div class="ls-mini-labels">${lbls}</div></div>`;
