@@ -153,7 +153,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans G
 .dash-date-group{margin-bottom:12px;}
 .dash-date-group:last-child{margin-bottom:0;}
 .dash-date{font-size:12px;color:var(--text3);font-weight:500;margin-bottom:6px;padding-left:2px;}
-.dash-today .dash-date{font-size:14px;font-weight:700;color:var(--red);}
+.dash-selected .dash-date{font-size:14px;font-weight:700;color:var(--red);}
+.dash-selected{background:#FFF8F8;border-radius:8px;padding:4px;margin:-4px;}
 .dash-item{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg);border-radius:8px;margin-bottom:4px;cursor:pointer;}
 .dash-item:last-child{margin-bottom:0;}
 .dash-item:active{opacity:0.7;}
@@ -407,7 +408,9 @@ function showApp(){
 async function init(){
   try{L=await(await fetch('/api/leaders')).json();}catch(e){}
   initLeaderPicker();
-  setDate(new Date());
+  cd=new Date();cd.setHours(0,0,0,0);
+  updNav();updWS();
+  await load();
 }
 
 // ---- Leader Picker (multi-select) ----
@@ -460,7 +463,7 @@ function onTypeChange(){
   }
 }
 
-function setDate(d){cd=new Date(d.getFullYear(),d.getMonth(),d.getDate());updNav();updWS();load();}
+function setDate(d){cd=new Date(d.getFullYear(),d.getMonth(),d.getDate());updNav();updWS();renderDash();}
 function changeDate(n){const d=new Date(cd);d.setDate(d.getDate()+n);setDate(d);}
 function goToday(){setDate(new Date());}
 function openDatePicker(){const p=document.getElementById('datePicker');p.value=fmt(cd);p.showPicker?p.showPicker():p.click();}
@@ -595,22 +598,25 @@ function tLabels(){
 
 // ---- Dashboard: 近30天概览 ----
 function renderDash(){
-  const today=new Date();today.setHours(0,0,0,0);
-  const upcoming=[];
-  for(let i=0;i<30;i++){
-    const d=new Date(today);d.setDate(today.getDate()+i);
+  const todayObj=new Date();todayObj.setHours(0,0,0,0);
+  const todayStr=fmt(todayObj);
+  const selectedStr=fmt(cd);
+  const all=[];
+  for(let i=-7;i<30;i++){
+    const d=new Date(todayObj);d.setDate(todayObj.getDate()+i);
     const ds=fmt(d);
     const dayItems=D.filter(s=>dateInRange(s,ds)).sort((a,b)=>(a.start_time||'').localeCompare(b.start_time||''));
-    if(dayItems.length)upcoming.push({date:d,ds,items:dayItems});
+    if(dayItems.length)all.push({date:d,ds,items:dayItems});
   }
   const wrap=document.getElementById('dashWrap');
-  if(!upcoming.length){wrap.innerHTML='';return;}
+  if(!all.length){wrap.innerHTML='';return;}
   let h='<div class="dashboard"><div class="dash-section"><div class="dash-title">📋 近30日行程概览</div>';
-  upcoming.forEach(g=>{
-    const diff=Math.round((g.date-today)/864e5);
+  all.forEach(g=>{
+    const diff=Math.round((g.date-todayObj)/864e5);
+    const isSelected=g.ds===selectedStr;
     let label=`${g.date.getMonth()+1}月${g.date.getDate()}日 星期${WD[g.date.getDay()]}`;
     if(diff===0)label+=' (今天)';else if(diff===1)label+=' (明天)';else if(diff===2)label+=' (后天)';
-    h+=`<div class="dash-date-group${diff===0?' dash-today':''}"><div class="dash-date">${label} · ${g.items.length}条</div>`;
+    h+=`<div class="dash-date-group${isSelected?' dash-selected':''}" data-date="${g.ds}"><div class="dash-date">${label} · ${g.items.length}条</div>`;
     g.items.forEach(s=>{
       const lArr=getLeaders(s);
       const l=L.find(x=>x.name===lArr[0]);const c=l?l.color:'#999';
@@ -626,8 +632,8 @@ function renderDash(){
   });
   h+='</div></div>';
   wrap.innerHTML=h;
-  const todayEl=wrap.querySelector('.dash-today');
-  if(todayEl)setTimeout(()=>todayEl.scrollIntoView({behavior:'smooth',block:'start'}),50);
+  const selEl=wrap.querySelector(`[data-date="${selectedStr}"]`)||wrap.querySelector(`[data-date="${todayStr}"]`);
+  if(selEl)setTimeout(()=>selEl.scrollIntoView({behavior:'smooth',block:'start'}),50);
 }
 
 function goDateAndDetail(ds,id){
