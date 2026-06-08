@@ -46,7 +46,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans G
 .ls-content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 12px 80px;}
 .ls-month{font-size:11px;font-weight:600;color:var(--text3);padding:14px 4px 6px;letter-spacing:1px;text-transform:uppercase;}
 .ls-date-group{background:white;border-radius:10px;margin-bottom:8px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.04);}
-.ls-date-header{font-size:12px;font-weight:600;color:var(--text2);padding:8px 12px;background:#FAFAFA;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:10px;}
+.ls-date-header{font-size:12px;font-weight:600;color:var(--text2);padding:8px 12px;background:#FAFAFA;border-bottom:1px solid var(--border);}
 .ls-date-header.past{color:var(--text3);}
 .ls-date-header.is-today{color:var(--red);}
 /* Day overview bar (main timeline) */
@@ -153,6 +153,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans G
 .dash-date-group{margin-bottom:12px;}
 .dash-date-group:last-child{margin-bottom:0;}
 .dash-date{font-size:12px;color:var(--text3);font-weight:500;margin-bottom:6px;padding-left:2px;}
+.dash-today .dash-date{font-size:14px;font-weight:700;color:var(--red);}
 .dash-item{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg);border-radius:8px;margin-bottom:4px;cursor:pointer;}
 .dash-item:last-child{margin-bottom:0;}
 .dash-item:active{opacity:0.7;}
@@ -274,9 +275,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans G
 
 <div class="week-strip" id="ws"></div>
 <div id="dashWrap"></div>
-<div class="summary" id="sum"></div>
-<div id="fb"></div>
-<div id="ct"><div style="text-align:center;padding:40px;color:#999;">加载中...</div></div>
 <div class="footer">数据自动同步</div>
 
 <button class="fab" onclick="openCreate()">＋</button>
@@ -491,20 +489,9 @@ async function load(){
   try{
     D=await(await fetch('/api/schedules')).json();
     document.getElementById('syncTime').textContent='更新: '+new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'});
-    // Update week strip dots
-    const s=document.getElementById('ws'),days=s.querySelectorAll('.day'),d=new Date(cd),dw=d.getDay()||7,m=new Date(d);
-    m.setDate(d.getDate()-dw+1);
-    days.forEach((el,i)=>{
-      const dy=new Date(m);dy.setDate(m.getDate()+i);
-      const ds2=fmt(dy);
-      if(D.some(x=>dateInRange(x,ds2))&&!el.querySelector('.dot')){
-        const dot=document.createElement('div');dot.className='dot';el.appendChild(dot);
-      }
-    });
-    render();
     renderDash();
     renderLeaderKanban();
-  }catch(e){document.getElementById('ct').innerHTML='<div class="empty"><div class="icon">⚠️</div><div class="msg">加载失败</div></div>';}
+  }catch(e){console.error(e);}
 }
 
 // ---- Type Tag Helper ----
@@ -515,14 +502,7 @@ function typeTag(type){
   return '';
 }
 
-function render(){
-  const ds=fmt(cd);
-  let items=D.filter(s=>dateInRange(s,ds));
-  const allLeaders=new Set(items.flatMap(s=>getLeaders(s)));
-  document.getElementById('sum').innerHTML=`<div><strong>${items.length}</strong>条行程</div><div><strong>${allLeaders.size}</strong>位领导</div>`;
-  if(!items.length){document.getElementById('fb').innerHTML='';document.getElementById('ct').innerHTML='<div class="empty"><div class="icon">📭</div><div class="msg">当日暂无行程安排</div></div>';return;}
-  rAll(items);
-}
+function render(){}
 
 function schCard(s,showLeader){
   const lArr=getLeaders(s);
@@ -630,7 +610,7 @@ function renderDash(){
     const diff=Math.round((g.date-today)/864e5);
     let label=`${g.date.getMonth()+1}月${g.date.getDate()}日 星期${WD[g.date.getDay()]}`;
     if(diff===0)label+=' (今天)';else if(diff===1)label+=' (明天)';else if(diff===2)label+=' (后天)';
-    h+=`<div class="dash-date-group"><div class="dash-date">${label} · ${g.items.length}条</div>`;
+    h+=`<div class="dash-date-group${diff===0?' dash-today':''}"><div class="dash-date">${label} · ${g.items.length}条</div>`;
     g.items.forEach(s=>{
       const lArr=getLeaders(s);
       const l=L.find(x=>x.name===lArr[0]);const c=l?l.color:'#999';
@@ -646,11 +626,12 @@ function renderDash(){
   });
   h+='</div></div>';
   wrap.innerHTML=h;
+  const todayEl=wrap.querySelector('.dash-today');
+  if(todayEl)setTimeout(()=>todayEl.scrollIntoView({behavior:'smooth',block:'start'}),50);
 }
 
 function goDateAndDetail(ds,id){
-  const d=new Date(ds+'T00:00:00');setDate(d);
-  if(id)setTimeout(()=>openDetail(id),300);
+  if(id)openDetail(id);
 }
 
 // ---- Leader Kanban ----
@@ -750,7 +731,6 @@ function buildDateGroups(list,today){
       h+=`<div class="ls-date-group">
         <div class="ls-date-header ${isPast&&!isToday?'past':''} ${isToday?'is-today':''}">
           <span>${dayLabel}${isToday?' <span class="tag tag-t">今天</span>':''}</span>
-          ${miniBar(items)}
         </div>`;
       items.forEach(s=>{
         const tt=typeTag(s.type);
