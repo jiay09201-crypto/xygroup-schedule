@@ -632,8 +632,10 @@ function renderDash(){
   });
   h+='</div></div>';
   wrap.innerHTML=h;
-  const selEl=wrap.querySelector(`[data-date="${selectedStr}"]`)||wrap.querySelector(`[data-date="${todayStr}"]`);
-  if(selEl)setTimeout(()=>selEl.scrollIntoView({behavior:'smooth',block:'start'}),50);
+  if(selectedStr!==todayStr){
+    const selEl=wrap.querySelector(`[data-date="${selectedStr}"]`);
+    if(selEl)setTimeout(()=>selEl.scrollIntoView({behavior:'smooth',block:'start'}),50);
+  }
 }
 
 function goDateAndDetail(ds,id){
